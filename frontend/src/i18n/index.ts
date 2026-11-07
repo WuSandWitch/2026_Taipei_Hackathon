@@ -65,10 +65,39 @@ export const localeMeta = computed(
 /** The whole dictionary, for templates that read several keys. */
 export const s = computed(() => DICTS[state.locale]);
 
-/** One string. Falls back to zh-TW, which can only happen if a locale file is
- *  mid-edit, because the type-checker requires every key everywhere. */
-export function t(key: keyof Strings): string {
-  return DICTS[state.locale][key] ?? DICTS[DEFAULT_LOCALE][key];
+/**
+ * One string, with optional `{placeholder}` substitution.
+ *
+ *   t('arrivingNow', { route: '307' })   // 307 即將進站
+ *
+ * Placeholders rather than sentence fragments glued together, because word
+ * order differs per language: "Route 307 arrives in 3 minutes" and
+ * "Tuyến 307 đến trong 3 phút" cannot be built from the same concatenation.
+ *
+ * A missing value leaves the placeholder visible on purpose. A half-built
+ * sentence is easier to spot and report than a silently empty gap.
+ */
+export function t(key: keyof Strings, vars?: Record<string, string | number>): string {
+  const raw = DICTS[state.locale][key] ?? DICTS[DEFAULT_LOCALE][key];
+  if (!vars) return raw;
+  return raw.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in vars ? String(vars[name]) : match
+  );
+}
+
+/**
+ * The form of a place name to speak, as opposed to the one to show.
+ *
+ * The screen always shows the Chinese name so it matches the stop sign. Speech
+ * cannot use it outside Chinese: an engine set to vi, th or fil has no reading
+ * for Chinese characters and will skip or mangle exactly the word that carries
+ * the information. So non-Chinese locales speak the romanised name, and fall
+ * back to the Chinese one when TDX has no English for that stop — a
+ * mispronounced name still beats silence.
+ */
+export function spoken(zh: string, en?: string): string {
+  if (state.locale === 'zh-TW') return zh;
+  return en && en.trim() ? en : zh;
 }
 
 export function setLocale(next: LocaleCode): void {
