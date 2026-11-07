@@ -1,0 +1,94 @@
+# 部署到 Cloud Run + Firebase Hosting。
+#
+# 只在 main 有變動時跑，加上手動觸發（workflow_dispatch），這樣功能分支 push
+# 不會意外改動線上服務 —— demo 前一天尤其不想要那種驚喜。
+#
+# 認證用 Workload Identity Federation，不是 service account key：repo 依比賽規定
+# 必須公開，不應該有長期金鑰檔案存在於這個專案的任何地方。
+# 一次性設定見 scripts/setup-cicd.sh。
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# 不要讓兩個部署同時跑。這裡不取消進行中的 run：部署中途被砍掉會留下不確定的狀態。
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  REGION: asia-east1
+  SERVICE: bus-assist-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # WIF 需要這個才能取得 OIDC token
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      # 刻意不帶 --set-env-vars：TDX 金鑰是在 Cloud Run 的服務設定上管理的，
+      # 重新部署會原封不動保留。帶了反而會整組覆蓋，而且金鑰就得多存一份在 GitHub。
+      - name: Deploy backend to Cloud Run
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --source backend \
+            --region "$REGION" \
+            --allow-unauthenticated \
+            --memory 512Mi \
+            --timeout 60 \
+            --quiet
+
+      - name: Read backend URL
+        id: api
+        run: |
+          url="$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')"
+          echo "base=$url" >> "$GITHUB_OUTPUT"
+          echo "後端：$url"
+
+      # /health 而不是 /healthz：Cloud Run 的 Google 前端會攔掉 run.app 上的 /healthz。
+      - name: Smoke-test backend
+        run: curl -fsS "${{ steps.api.outputs.base }}/health"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # VITE_API_BASE 是 Vite 的編譯期變數，所以後端網址必須在這一步才寫進 bundle。
+      - name: Build frontend against the deployed backend
+        working-directory: frontend
+        run: |
+          npm ci
+          VITE_API_BASE="${{ steps.api.outputs.base }}" npm run build
+
+      - name: Deploy frontend to Firebase Hosting
+        working-directory: frontend
+        run: npx --yes firebase-tools deploy --only hosting --project "${{ vars.GCP_PROJECT_ID }}" --non-interactive
+
+      - name: Summary
+        run: |
+          {
+            echo "### 已部署"
+            echo "- 後端 API：${{ steps.api.outputs.base }}"
+            echo "- 前端網頁：https://${{ vars.GCP_PROJECT_ID }}.web.app"
+            echo ""
+            echo "前端網址若有變動，記得同步 \`app/lib/util/bus_assist_config.dart\` 的 \`defaultValue\`。"
+          } >> "$GITHUB_STEP_SUMMARY"
