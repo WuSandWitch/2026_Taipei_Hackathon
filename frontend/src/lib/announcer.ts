@@ -3,13 +3,14 @@
  * spoken voice (TTS) and vibration.
  *
  * Voice output:
- *  - In the app: posts `tts_speak` `{ text }` to a custom native handler
- *    (TODO for the app side: implement with flutter_tts, offline engine).
+ *  - In the app: posts `tts_speak` `{ text }` to our native handler in
+ *    app/lib/util/web_message_handler/bus_assist_message_handler.dart
+ *    (flutter_tts on the phone's built-in engine, so no cloud inference).
  *    On start we probe the handler; if it doesn't reply we fall back to Web Speech.
  *  - In a browser: window.speechSynthesis (uses the OS voice; dev fallback).
  *
  * Vibration:
- *  - In the app: posts `vibrate` `{ pattern }` (TODO for the app side, e.g. HapticFeedback / vibration package).
+ *  - In the app: posts `vibrate` `{ pattern }` to the same handler (HapticFeedback).
  *  - In a browser: navigator.vibrate (Android Chrome only; iOS ignores it).
  *
  * Screen-reader users who rely on VoiceOver/TalkBack may prefer turning TTS off

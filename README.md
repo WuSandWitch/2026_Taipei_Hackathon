@@ -34,13 +34,32 @@ npm run build
 Vue 3 + Vite + TypeScript。流程、Demo 參數、**在城市通 WebView 裡執行的方法**、後端 API 約定與 App 端 Handler 見 [`frontend/README.md`](frontend/README.md)。
 
 ### 後端
-TODO（含環境變數說明，見 `backend/.env.example`）
+```bash
+cd backend
+cp .env.example .env          # 填入 TDX_CLIENT_ID / TDX_CLIENT_SECRET
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --reload --port 8080
+```
+Python 3.12 + FastAPI，代理 TDX 公車 API（金鑰只留在後端）。
+端點、用到的 TDX 欄位、快取策略與已知限制見 [`backend/README.md`](backend/README.md)；
+環境變數見 `backend/.env.example`。部署：`gcloud run deploy bus-assist-api --source . --region asia-east1`。
 
 ## 資料來源
+所有欄位都對照 TDX 線上 OpenAPI spec（`公共運輸-公車`，2026/11/07 查證）確認過，
+spec 與欄位代碼對照表見 [`backend/README.md`](backend/README.md)。
+
 | 資料集 | 來源平台 | 連結 | 核心／模擬 |
 |---|---|---|---|
-| TODO：公車站牌、路線站序、預估到站、公車即時位置（後端串接後填入） | TDX | | 核心 |
+| 市區公車站位資料（臺北市） | TDX | https://tdx.transportdata.tw/api/basic/v2/Bus/Station/City/Taipei | 核心 |
+| 市區公車路線資料（臺北市） | TDX | https://tdx.transportdata.tw/api/basic/v2/Bus/Route/City/Taipei | 核心 |
+| 市區公車路線站序資料（臺北市） | TDX | https://tdx.transportdata.tw/api/basic/v2/Bus/StopOfRoute/City/Taipei | 核心 |
+| 市區公車預估到站資料 N1（臺北市） | TDX | https://tdx.transportdata.tw/api/basic/v2/Bus/EstimatedTimeOfArrival/City/Taipei | 核心 |
+| 市區公車動態定點資料 A2（臺北市） | TDX | https://tdx.transportdata.tw/api/basic/v2/Bus/RealTimeNearStop/City/Taipei | 核心 |
+| 市區公車動態站牌資料 A1（臺北市） | TDX | https://tdx.transportdata.tw/api/basic/v2/Bus/RealTimeByFrequency/City/Taipei | 核心 |
+| 市區公車車輛資料（臺北市，判斷低地板） | TDX | https://tdx.transportdata.tw/api/basic/v2/Bus/Vehicle/City/Taipei | 核心 |
 | 前端模擬路線與到站資料（`frontend/src/data/mock.ts`，非真實路線） | — | — | 模擬 |
+
+未設定 `VITE_API_BASE` 時前端跑的是上表最後一列的**模擬資料**，畫面左上角會顯示「模擬資料」。
 
 ## 第三方套件
 | 套件 | 用在哪 | 授權 |
@@ -52,6 +71,11 @@ TODO（含環境變數說明，見 `backend/.env.example`）
 | vite、@vitejs/plugin-vue（開發用） | frontend | MIT |
 | typescript（開發用） | frontend | Apache-2.0 |
 | vue-tsc、@vue/tsconfig（開發用） | frontend | MIT |
+| fastapi | backend | MIT |
+| uvicorn | backend | BSD-3-Clause |
+| httpx | backend | BSD-3-Clause |
+| python-dotenv | backend | BSD-3-Clause |
+| pydantic（fastapi 相依） | backend | MIT |
 
 ## AI 使用聲明
 - 開發階段：使用 Claude Code 等工具協助開發。
