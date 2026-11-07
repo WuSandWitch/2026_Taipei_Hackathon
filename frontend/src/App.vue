@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { announcer, probeNativeTts, setTtsEnabled, stopSpeaking } from '@/lib/announcer';
 import { source } from '@/data';
 import { resetTrip } from '@/stores/trip';
 import { s } from '@/i18n';
+import { setKeepAwake } from '@/lib/wakelock';
 
 const route = useRoute();
 const router = useRouter();
@@ -30,10 +31,16 @@ function endTrip() {
   router.replace({ name: 'plan', query: route.query });
 }
 
+// Hold the screen awake for the whole trip, not per screen: the gap between
+// wait, board and ride is exactly when a dropped lock would let the phone sleep
+// and freeze the timers that drive the announcements.
+watch(onTrip, (running) => setKeepAwake(running), { immediate: true });
+
 onMounted(probeNativeTts);
 onBeforeUnmount(() => {
   window.clearTimeout(armTimer);
   stopSpeaking();
+  setKeepAwake(false);
 });
 </script>
 

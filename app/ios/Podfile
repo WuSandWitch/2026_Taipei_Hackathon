@@ -40,5 +40,18 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # device_info_plus >= 12.4.0 calls NSProcessInfo.isiOSAppOnVision, which is
+    # only declared in the iOS 26.1 SDK. Force-include a header that declares it
+    # so the pod compiles on Xcode 26.0 too. See ios/VisionCompat.h — it is a
+    # no-op once the SDK provides the declaration.
+    if target.name == 'device_info_plus'
+      target.build_configurations.each do |config|
+        flags = config.build_settings['OTHER_CFLAGS'] || ['$(inherited)']
+        flags = [flags] if flags.is_a?(String)
+        flags += ['-include', '"${PODS_ROOT}/../VisionCompat.h"']
+        config.build_settings['OTHER_CFLAGS'] = flags
+      end
+    end
   end
 end
