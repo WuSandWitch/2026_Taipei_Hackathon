@@ -75,6 +75,13 @@
 			<key>LocationTemporaryUsageKey</key>
 			<string>TownPass 需要精確定位權限才可正常使用</string>
 		</dict>
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSAllowsLocalNetworking</key>
+			<true/>
+		</dict>
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>開發時連到電腦上的微服務網頁</string>
 		<key>NSCameraUsageDescription</key>
         <string>This app needs camera access to scan QR codes</string>
         <key>NSPhotoLibraryUsageDescription</key>

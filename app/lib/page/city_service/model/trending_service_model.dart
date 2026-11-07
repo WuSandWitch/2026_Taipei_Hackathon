@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:town_pass/gen/assets.gen.dart';
+import 'package:town_pass/util/bus_assist_config.dart';
 
 abstract final class TrendingServiceModel {
   static List<TrendingService> get serviceList {
     return [
+      TrendingService(
+        title: BusAssistConfig.title,
+        icon: Assets.svg.iconBusAssist.svg(),
+        url: BusAssistConfig.url,
+        forceWebViewTitle: BusAssistConfig.title,
+      ),
       TrendingService(
         title: '找地點',
         icon: Assets.svg.iconLocationSearch.svg(),

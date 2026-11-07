@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:town_pass/gen/assets.gen.dart';
+import 'package:town_pass/util/bus_assist_config.dart';
 
 // 先於 MyServiceItemId enum 加入新服務；
 // 再在 MyServiceIdExt 擴充中加入該服務的 MyServiceItem 物件。
@@ -29,6 +30,7 @@ enum MyServiceItemId {
   library,
   locationSearch,
   zoo,
+  busAssist,
   ;
 }
 
@@ -182,6 +184,14 @@ extension MyServiceIdExt on MyServiceItemId {
           icon: Assets.svg.iconZoo24.svg(),
           category: MyServiceCategory.explore,
           destinationUrl: '',
+        ),
+      MyServiceItemId.busAssist => MyServiceItem(
+          title: BusAssistConfig.title,
+          description: '視障搭公車：等車提醒、確認上車、下車提醒',
+          icon: Assets.svg.iconBusAssist.svg(),
+          category: MyServiceCategory.cityLife,
+          destinationUrl: BusAssistConfig.url,
+          forceWebViewTitle: BusAssistConfig.title,
         ),
     };
   }

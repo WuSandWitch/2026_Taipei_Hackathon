@@ -1,0 +1,172 @@
+/*
+ * Design tokens.
+ * Base type is larger than TownPass defaults (body 14px) on purpose:
+ * this service is for blind and low-vision riders. 1rem = 20px at default zoom
+ * and scales with the user's text size setting.
+ * The one bold element is the LED route sign (black + amber, like Taipei bus head signs).
+ */
+:root {
+  --paper: #ffffff;
+  --surface: #f1f3f4;
+  --ink: #0f2a30;
+  --ink-soft: #40555b;
+  --line: #adb8be;
+  --teal: #1f5560;
+  --teal-press: #163f47;
+  --teal-tint: #e3f1f4;
+  --on-teal: #ffffff;
+  --led-bg: #000000;
+  --led: #ffb000;
+  --led-soft: #ffd27a;
+  --ok: #17663a;
+  --ok-tint: #e3f3e8;
+  --danger: #a3241c;
+  --danger-tint: #fbe9e7;
+  --focus: #f5ba4b;
+
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --gutter: 16px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0c1214;
+    --surface: #182226;
+    --ink: #f1f5f6;
+    --ink-soft: #b9c6ca;
+    --line: #4b5b61;
+    --teal: #8fd3e0;
+    --teal-press: #b4e2ea;
+    --teal-tint: #15333a;
+    --on-teal: #06181c;
+    --ok: #7ad69c;
+    --ok-tint: #10301d;
+    --danger: #ff9b90;
+    --danger-tint: #3a1512;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0c1214;
+  --surface: #182226;
+  --ink: #f1f5f6;
+  --ink-soft: #b9c6ca;
+  --line: #4b5b61;
+  --teal: #8fd3e0;
+  --teal-press: #b4e2ea;
+  --teal-tint: #15333a;
+  --on-teal: #06181c;
+  --ok: #7ad69c;
+  --ok-tint: #10301d;
+  --danger: #ff9b90;
+  --danger-tint: #3a1512;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 125%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+h2 {
+  font-size: 1.15rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 4px solid var(--focus);
+  outline-offset: 3px;
+}
+
+h1:focus,
+h2:focus {
+  outline: none;
+}
+
+.num {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 8px var(--gutter) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: calc(100dvh - 64px);
+}
+
+.page__actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.lede {
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -68,7 +68,7 @@
 
 作品通常是「一個微服務網頁 + 視需要的後端」。App 本身可改可不改：要掛上我們的服務入口一定要改；要用到內建沒有的原生能力（例如語音、裝置端 AI）就要在 App 加自訂 Handler。
 
-- `frontend/` 技術棧：`TODO（決定後填，官方範例是 Vue 3 + Vite；React／純 HTML 也可以）`
+- `frontend/` 技術棧：Vue 3 + Vite + TypeScript（npm）。流程與 API 約定見 `frontend/README.md`
 - `backend/` 技術棧：`TODO`（語言不限，但要有 Dockerfile）
 
 ---
