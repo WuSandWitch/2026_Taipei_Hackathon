@@ -41,8 +41,30 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --reload --port 8080
 ```
 Python 3.12 + FastAPI，代理 TDX 公車 API（金鑰只留在後端）。
+Docker image 已驗證可建置並以真實 TDX 資料運行（162 MB，讀 `PORT` 環境變數）。
 端點、用到的 TDX 欄位、快取策略與已知限制見 [`backend/README.md`](backend/README.md)；
-環境變數見 `backend/.env.example`。部署：`gcloud run deploy bus-assist-api --source . --region asia-east1`。
+環境變數見 `backend/.env.example`。
+
+### 一次部署前後端
+
+```bash
+# 前置（你本人在終端機跑一次就好）
+gcloud auth login
+gcloud config set project <你的 GCP 專案>
+firebase login
+
+./scripts/deploy.sh
+```
+
+腳本的順序是刻意的：後端先上 → 拿到它的 HTTPS 網址 → 才 build 前端
+（`VITE_API_BASE` 是 Vite 的**編譯期**變數，順序顛倒前端會指向 localhost）→
+最後把前端網址填進 `app/lib/util/bus_assist_config.dart` 的 `defaultValue`，重新 `flutter run`。
+
+Cloud Run 需要「已啟用計費」的 GCP 專案（免費額度對這個服務很夠）。確認方式：
+`gcloud billing projects describe <專案 id>`。
+
+腳本用 `--set-env-vars` 帶 TDX 金鑰，方便但會留在 Cloud Run 的服務設定裡。
+長期維運建議改用 Secret Manager（`--set-secrets`）。
 
 ## 資料來源
 所有欄位都對照 TDX 線上 OpenAPI spec（`公共運輸-公車`，2026/11/07 查證）確認過，
