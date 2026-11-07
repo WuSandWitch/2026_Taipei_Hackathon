@@ -18,7 +18,7 @@ SA_NAME="github-deployer"
 [ -n "$PROJECT" ] && [ "$PROJECT" != "(unset)" ] || { echo "❌ 先設定專案：gcloud config set project <id>" >&2; exit 1; }
 PNUM="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')"
 SA="${SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
-echo "專案 $PROJECT（號碼 $PNUM）   repo $REPO"
+echo "專案 ${PROJECT}（號碼 ${PNUM}）   repo $REPO"
 
 echo "▸ 啟用需要的 API"
 gcloud services enable iamcredentials.googleapis.com sts.googleapis.com iam.googleapis.com \

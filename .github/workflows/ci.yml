@@ -47,6 +47,12 @@ jobs:
       # 資料端點回 503」，CI 這一步就是在守住那個行為。
       - run: python -c "from app.main import app; assert any(r.path == '/health' for r in app.routes)"
 
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/lint-shell.sh
+
   docker:
     runs-on: ubuntu-latest
     steps:
