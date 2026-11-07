@@ -40,8 +40,17 @@ class ArrivalUpdate(BaseModel):
     lowFloor: bool | None = None
 
 
+BoardStatus = Literal["on_board", "wrong_bus", "unknown"]
+
+
 class BoardCheck(BaseModel):
     onBus: bool
+    # Why `unknown` is separate from `wrong_bus`: not finding the vehicle is not
+    # evidence of being on the wrong one. A1 positions lag by 15-60 s, so "we
+    # cannot tell yet" is the common case right after boarding. Telling a rider
+    # they are on the wrong bus when we simply have no data gets them off a
+    # perfectly good bus.
+    status: BoardStatus = "unknown"
     plate: str | None = None
     reason: str | None = None
 

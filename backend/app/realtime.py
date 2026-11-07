@@ -303,6 +303,7 @@ async def board_check(route_uid: str, direction: int, plate: str | None, lat: fl
     if mine is None:
         return BoardCheck(
             onBus=False,
+            status="unknown",
             reason=f"現在查不到 {route_name} 的車輛位置，可能是車上定位還沒更新。再等一下，或按一次重新確認。",
         )
     # Only warn about another bus when the user is actually next to it. Merely
@@ -315,12 +316,14 @@ async def board_check(route_uid: str, direction: int, plate: str | None, lat: fl
     ):
         return BoardCheck(
             onBus=False,
+            status="wrong_bus",
             reason=f"你的位置正在跟著 {other[1]} 的車移動，可能搭錯車了。建議下一站就下車。",
         )
     if mine[0] <= config.BOARD_RADIUS_M:
-        return BoardCheck(onBus=True, plate=mine[1])
+        return BoardCheck(onBus=True, status="on_board", plate=mine[1])
     return BoardCheck(
         onBus=False,
+        status="unknown",
         reason=f"你的位置離 {route_name} 的車還有大約 {round(mine[0] / 10) * 10} 公尺，可能還沒上車。",
     )
 

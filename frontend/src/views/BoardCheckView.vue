@@ -12,7 +12,7 @@ import { getLocation } from '@/lib/bridge';
 import { source } from '@/data';
 import { trip } from '@/stores/trip';
 
-type Phase = 'checking' | 'ok' | 'wrong' | 'error';
+type Phase = 'checking' | 'ok' | 'wrong' | 'unknown' | 'error';
 
 const router = useRouter();
 const route = useRoute();
@@ -32,12 +32,18 @@ async function check() {
       phase.value = 'ok';
       say(`確認了，你在${r.value.routeName}上，往${r.value.headsign}。下車前會提醒你。`, { vibe: Vibe.tick });
       autoTimer = window.setTimeout(goRide, 5000);
-    } else {
+    } else if (result.status === 'wrong_bus') {
       phase.value = 'wrong';
       say(`這班車可能不是${r.value.routeName}。${result.reason ?? ''}建議在下一站下車，我們會幫你重新等車。`, {
         urgent: true,
         vibe: Vibe.warning
       });
+    } else {
+      // Not "wrong bus" — just no position data yet. Deliberately calmer: no
+      // urgent announcement and no alarm buzz, because the usual cause is the
+      // 15-60 s lag in A1 and the rider is most likely on the right bus.
+      phase.value = 'unknown';
+      say(`還沒辦法確認。${result.reason ?? ''}`, { vibe: Vibe.tick });
     }
   } catch {
     phase.value = 'error';
@@ -92,6 +98,26 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
       <div class="page__actions">
         <BigButton variant="danger" @click="waitAgain">我下車了，重新等車</BigButton>
         <BigButton variant="secondary" @click="goRide">我確定搭對了</BigButton>
+      </div>
+    </template>
+
+    <!-- Cannot tell yet. Separate from "wrong bus" on purpose: the common cause
+         is that A1 has not refreshed, so the rider is probably on the right
+         bus. Reminder colours, and "stay on" is the first action. -->
+    <template v-else-if="phase === 'unknown'">
+      <StepHeading :step="3" focus-key="unknown">還沒辦法確認是不是 {{ r.routeName }}</StepHeading>
+      <div class="card result">
+        <div class="badge badge--warn" aria-hidden="true">?</div>
+        <p class="big">{{ trip.boardCheck?.reason ?? '車上的定位還沒更新。' }}</p>
+        <p class="lede">
+          這不代表你搭錯車。公車的定位大約每分鐘才更新一次，先別急著下車。
+          不放心的話，可以問司機：「這是 {{ r.routeName }} 嗎？」
+        </p>
+      </div>
+      <div class="page__actions">
+        <BigButton @click="check">再確認一次</BigButton>
+        <BigButton variant="secondary" @click="goRide">我確定搭對了，開始提醒</BigButton>
+        <BigButton variant="quiet" @click="waitAgain">我下車了，重新等車</BigButton>
       </div>
     </template>
 
