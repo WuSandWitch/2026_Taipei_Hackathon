@@ -12,8 +12,30 @@ abstract final class _Tts {
   static final FlutterTts _tts = FlutterTts();
   static Future<void>? _ready;
 
+  static String _language = 'zh-TW';
+
+  /// Switch the engine's language. The web page sends a BCP 47 tag with each
+  /// `tts_speak`, because the rider chooses their language on the landing
+  /// screen and a 新住民 reading Tiếng Việt must not hear Mandarin.
+  static Future<void> setLanguage(String? locale) async {
+    final String next = (locale ?? '').trim();
+    if (next.isEmpty || next == _language) return;
+    final FlutterTts tts = await instance;
+    try {
+      // Falls back to the current language when the device has no voice for it,
+      // which is common for th/fil on a stock install.
+      final dynamic available = await tts.isLanguageAvailable(next);
+      if (available == true || available == 1) {
+        await tts.setLanguage(next);
+        _language = next;
+      }
+    } catch (error) {
+      debugPrint('tts setLanguage($next): $error');
+    }
+  }
+
   static Future<void> _init() async {
-    await _tts.setLanguage('zh-TW');
+    await _tts.setLanguage(_language);
     // flutter_tts scale: 0.5 is normal speed on both iOS and Android.
     await _tts.setSpeechRate(0.5);
     await _tts.awaitSpeakCompletion(false);
@@ -40,7 +62,7 @@ abstract final class _Tts {
   }
 }
 
-/// `tts_speak` — data: `{ text: String, probe?: bool }`
+/// `tts_speak` — data: `{ text: String, locale?: String, probe?: bool }`
 /// Replies `true` when speech started. With `probe: true` it only replies `true`,
 /// so the web page can detect that native TTS is available.
 class TtsSpeakMessageHandler extends TPWebMessageHandler {
@@ -66,6 +88,7 @@ class TtsSpeakMessageHandler extends TPWebMessageHandler {
       return;
     }
     try {
+      await _Tts.setLanguage(data['locale'] as String?);
       final FlutterTts tts = await _Tts.instance;
       await tts.stop();
       final dynamic result = await tts.speak(text);

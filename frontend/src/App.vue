@@ -4,12 +4,14 @@ import { useRoute, useRouter } from 'vue-router';
 import { announcer, probeNativeTts, setTtsEnabled, stopSpeaking } from '@/lib/announcer';
 import { source } from '@/data';
 import { resetTrip } from '@/stores/trip';
+import { s } from '@/i18n';
 
 const route = useRoute();
 const router = useRouter();
 
-const onTrip = computed(() => route.name !== 'plan' && route.name !== 'arrive');
-const title = computed(() => (route.meta.title as string) || '公車陪你搭');
+const onTrip = computed(
+  () => route.name !== 'landing' && route.name !== 'plan' && route.name !== 'arrive'
+);
 
 // Ending a trip by accident is costly for a blind rider, so it takes two presses.
 const armed = ref(false);
@@ -37,29 +39,41 @@ onBeforeUnmount(() => {
 <template>
   <!-- Town Pass "Top navigation / text button": white bar, centred title,
        text button on the left, control on the right. -->
+  <!-- Town Pass "Top navigation": controls only. The service name is not
+       repeated here — the app's WebView header already shows it, so a second
+       copy would cost a line of screen and a wasted stop for a screen reader.
+       The centre slot carries status instead. -->
   <header class="bar">
     <div class="bar__side">
-      <button v-if="onTrip" type="button" class="bar__end" :class="{ 'bar__end--armed': armed }" @click="endTrip">
-        {{ armed ? '再按一次結束' : '結束行程' }}
+      <button
+        v-if="onTrip"
+        type="button"
+        class="bar__end"
+        :class="{ 'bar__end--armed': armed }"
+        @click="endTrip"
+      >
+        {{ armed ? s.endTripArmed : s.endTrip }}
       </button>
+      <RouterLink v-else class="bar__end" :to="{ name: 'landing', query: route.query }">
+        {{ s.changeLang }}
+      </RouterLink>
     </div>
 
-    <div class="bar__title" aria-hidden="true">
-      <span>{{ title }}</span>
-      <span v-if="source.isMock" class="bar__mock">模擬資料</span>
+    <div class="bar__title">
+      <span v-if="source.isMock" class="bar__mock">{{ s.mockData }}</span>
     </div>
-    <p v-if="source.isMock" class="sr-only">目前使用模擬資料</p>
+    <p v-if="source.isMock" class="sr-only">{{ s.mockDataSr }}</p>
 
     <div class="bar__side bar__side--end">
       <button
         type="button"
         role="switch"
         class="toggle"
-        aria-label="語音播報"
+        :aria-label="s.voiceToggle"
         :aria-checked="announcer.ttsEnabled"
         @click="setTtsEnabled(!announcer.ttsEnabled)"
       >
-        <span class="toggle__label">語音</span>
+        <span class="toggle__label">{{ s.voiceToggle }}</span>
         <span class="toggle__track" aria-hidden="true"><span class="toggle__knob" /></span>
       </button>
     </div>
@@ -99,14 +113,11 @@ onBeforeUnmount(() => {
   justify-content: flex-end;
 }
 
+/* Status slot. Empty most of the time, which is the intended look. */
 .bar__title {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  color: var(--ink-2);
-  font-weight: 600;
-  font-size: 0.95rem;
-  line-height: 1.3;
   text-align: center;
 }
 
@@ -118,7 +129,10 @@ onBeforeUnmount(() => {
 
 /* Text button, as in the kit's top navigation. */
 .bar__end {
+  display: inline-flex;
+  align-items: center;
   min-height: 48px;
+  text-decoration: none;
   padding: 4px 8px;
   border: 0;
   border-radius: var(--radius-md);

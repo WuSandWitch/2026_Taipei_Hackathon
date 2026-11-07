@@ -18,6 +18,7 @@
  */
 import { reactive } from 'vue';
 import { inApp, post, request } from './bridge';
+import { localeMeta } from '@/i18n';
 
 export const Vibe = {
   tick: [120],
@@ -68,14 +69,19 @@ export function setTtsEnabled(on: boolean): void {
 
 function speakAloud(text: string): void {
   if (!announcer.ttsEnabled || !text) return;
+  // The spoken language has to follow the chosen one. A Vietnamese rider
+  // reading Tiếng Việt while hearing Mandarin is worse than no speech at all,
+  // and for a voice-first user speech *is* the interface.
+  const lang = localeMeta.value.bcp47;
   if (announcer.nativeTts) {
-    post('tts_speak', { text });
+    // `locale` is additive: an older app build ignores it and keeps zh-TW.
+    post('tts_speak', { text, locale: lang });
     return;
   }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'zh-TW';
+    u.lang = lang;
     u.rate = 0.95;
     window.speechSynthesis.speak(u);
   }
