@@ -41,8 +41,53 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --reload --port 8080
 ```
 Python 3.12 + FastAPI，代理 TDX 公車 API（金鑰只留在後端）。
+Docker image 已驗證可建置並以真實 TDX 資料運行（162 MB，讀 `PORT` 環境變數）。
 端點、用到的 TDX 欄位、快取策略與已知限制見 [`backend/README.md`](backend/README.md)；
-環境變數見 `backend/.env.example`。部署：`gcloud run deploy bus-assist-api --source . --region asia-east1`。
+環境變數見 `backend/.env.example`。
+
+### 一次部署前後端
+
+```bash
+# 前置（你本人在終端機跑一次就好）
+gcloud auth login
+gcloud config set project <你的 GCP 專案>
+firebase login
+
+./scripts/deploy.sh
+```
+
+腳本的順序是刻意的：後端先上 → 拿到它的 HTTPS 網址 → 才 build 前端
+（`VITE_API_BASE` 是 Vite 的**編譯期**變數，順序顛倒前端會指向 localhost）→
+最後把前端網址填進 `app/lib/util/bus_assist_config.dart` 的 `defaultValue`，重新 `flutter run`。
+
+Cloud Run 需要「已啟用計費」的 GCP 專案（免費額度對這個服務很夠）。確認方式：
+`gcloud billing projects describe <專案 id>`。
+
+腳本用 `--set-env-vars` 帶 TDX 金鑰，方便但會留在 Cloud Run 的服務設定裡。
+長期維運建議改用 Secret Manager（`--set-secrets`）。
+
+### CI/CD（GitHub Actions）
+
+| Workflow | 觸發 | 做什麼 |
+|---|---|---|
+| `.github/workflows/ci.yml` | 每次 push 與 PR | 前端 `vue-tsc` + build、後端 `compileall` + import 檢查、`docker build` |
+| `.github/workflows/deploy.yml` | push 到 `main`（限 `backend/`、`frontend/` 變動）或手動 | 部署 Cloud Run → 煙霧測試 `/health` → 用後端網址 build 前端 → 部署 Firebase Hosting |
+
+CI 不需要任何 secret。部署用 **Workload Identity Federation**，沒有長期金鑰檔案 ——
+repo 依比賽規定必須公開，service account key 一旦外流等於整個 GCP 專案外流。
+
+一次性設定（會修改 GCP IAM，請本人執行）：
+
+```bash
+./scripts/setup-cicd.sh
+```
+
+它會建立 `github-deployer` service account、授權、建立 workload identity pool 與
+provider（用 `attribute-condition` 鎖死只有本 repo 能用），並寫入三個 GitHub
+repo variable：`GCP_PROJECT_ID`、`GCP_WIF_PROVIDER`、`GCP_DEPLOY_SA`。
+
+**TDX 金鑰不在 GitHub。** 它掛在 Cloud Run 的服務設定上，`deploy.yml` 刻意不帶
+`--set-env-vars`，重新部署會原封不動保留現有環境變數。這樣金鑰只存在一個地方。
 
 ## 資料來源
 所有欄位都對照 TDX 線上 OpenAPI spec（`公共運輸-公車`，2026/11/07 查證）確認過，

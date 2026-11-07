@@ -8,7 +8,7 @@
 abstract final class BusAssistConfig {
   static const String url = String.fromEnvironment(
     'BUS_ASSIST_URL',
-    defaultValue: 'http://localhost:5173/',
+    defaultValue: 'https://bus-assist-2026.web.app/',
   );
 
   static const String title = '公車陪你搭';

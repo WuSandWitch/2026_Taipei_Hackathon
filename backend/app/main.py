@@ -69,7 +69,13 @@ async def _station(stop_id: str) -> catalog.Station:
     return station
 
 
-@app.get("/healthz")
+# 對外一律用 /health：Cloud Run 的 Google 前端會把 run.app 網域上的 /healthz 直接回
+# 自己的 404 HTML，請求根本到不了容器。2026/11/07 在本服務實測過，被攔的只有
+# /healthz 這個路徑本身——/livez、/readyz、/fooz 都正常進到 FastAPI，所以不是
+# 「所有 z 結尾路徑」都不能用（網路上常見的說法比實際情況誇大）。
+# /healthz 仍然保留著，因為 Cloud Run 自己的 startup/liveness probe 是直連容器的。
+@app.get("/health")
+@app.get("/healthz", include_in_schema=False)
 async def healthz() -> dict:
     return {"ok": True, "city": config.CITY, "tdxConfigured": tdx.configured}
 
