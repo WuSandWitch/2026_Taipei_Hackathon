@@ -23,17 +23,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <template>
-  <div class="card" role="dialog" aria-modal="true" aria-labelledby="driver-card-title">
-    <p class="card__hint">把螢幕朝向司機</p>
-    <h1 id="driver-card-title" class="card__route num">{{ route }}</h1>
-    <p class="card__msg">我要搭這班車</p>
-    <p class="card__sub">我看不見，請等我上車，謝謝</p>
-    <button ref="closeBtn" type="button" class="card__close" @click="emit('close')">關閉</button>
+  <div class="driver" role="dialog" aria-modal="true" aria-labelledby="driver-card-title">
+    <p class="driver__hint">把螢幕朝向司機</p>
+    <h1 id="driver-card-title" class="driver__route num">{{ route }}</h1>
+    <p class="driver__msg">我要搭這班車</p>
+    <p class="driver__sub">我看不見，請等我上車，謝謝</p>
+    <button ref="closeBtn" type="button" class="driver__close" @click="emit('close')">關閉</button>
   </div>
 </template>
 
 <style scoped>
-.card {
+.driver {
   position: fixed;
   inset: 0;
   z-index: 50;
@@ -48,31 +48,31 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   gap: 12px;
 }
 
-.card__hint {
+.driver__hint {
   color: #bdbdbd;
   font-size: 1rem;
 }
 
-.card__route {
+.driver__route {
   color: var(--led);
   font-size: clamp(6rem, 42vw, 11rem);
   line-height: 1;
   font-weight: 900;
 }
 
-.card__msg {
+.driver__msg {
   font-size: clamp(2rem, 10vw, 3rem);
   font-weight: 800;
   line-height: 1.2;
 }
 
-.card__sub {
+.driver__sub {
   font-size: 1.3rem;
   font-weight: 600;
   max-width: 18em;
 }
 
-.card__close {
+.driver__close {
   margin-top: 28px;
   min-height: 3.6rem;
   min-width: 60%;
@@ -81,7 +81,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   background: transparent;
   color: #fff;
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 </style>

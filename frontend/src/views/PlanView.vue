@@ -100,10 +100,10 @@ onMounted(locate);
     <!-- Pick a route -->
     <template v-else-if="phase === 'route'">
       <StepHeading :step="1" focus-key="route">要搭哪一路公車？</StepHeading>
-      <p class="here">
-        你在 <strong>{{ trip.stop?.name }}</strong>
+      <p class="section-title">
+        你在 <strong class="here">{{ trip.stop?.name }}</strong>
       </p>
-      <ul class="list" aria-label="這個站牌的公車">
+      <ul class="section list" aria-label="這個站牌的公車">
         <li v-for="r in routes" :key="r.routeId + r.direction">
           <button type="button" class="row" :aria-label="routeLabel(r)" @click="pickRoute(r)">
             <span class="chip num" aria-hidden="true">{{ r.routeName }}</span>
@@ -111,6 +111,7 @@ onMounted(locate);
               <span class="row__main">往 {{ r.headsign }}</span>
               <span class="row__sub" :class="{ 'row__sub--soon': (r.etaSec ?? 999) <= 180 }">{{ formatEta(r.etaSec) }}</span>
             </span>
+            <span class="chevron" aria-hidden="true" />
           </button>
         </li>
       </ul>
@@ -122,14 +123,15 @@ onMounted(locate);
     <!-- Pick destination -->
     <template v-else-if="phase === 'dest'">
       <StepHeading :step="1" focus-key="dest">在哪一站下車？</StepHeading>
-      <p class="here">
-        搭 <strong class="num">{{ trip.route?.routeName }}</strong>，往{{ trip.route?.headsign }}
+      <p class="section-title">
+        搭 <strong class="num here">{{ trip.route?.routeName }}</strong>，往{{ trip.route?.headsign }}
       </p>
-      <ol class="list" aria-label="下車站">
+      <ol class="section list" aria-label="下車站">
         <li v-for="(s, i) in trip.stopsAhead" :key="s.stopId">
           <button type="button" class="row row--stop" :aria-label="destLabel(s, i)" @click="pickDest(s)">
             <span class="row__count num" aria-hidden="true">{{ i + 1 }}</span>
             <span class="row__main" aria-hidden="true">{{ s.name }}</span>
+            <span class="chevron" aria-hidden="true" />
           </button>
         </li>
       </ol>
@@ -149,6 +151,7 @@ onMounted(locate);
       />
       <p class="lede">接下來會用語音和震動提醒你：車快到了、有沒有上對車、什麼時候下車。</p>
       <div class="page__actions">
+        <p class="page__hint" aria-hidden="true">共 {{ stopsToGo }} 站・在 {{ trip.destination.name }} 下車</p>
         <BigButton @click="start">開始，陪我搭車</BigButton>
         <BigButton variant="secondary" @click="backToDest">重選下車站</BigButton>
       </div>
@@ -158,85 +161,97 @@ onMounted(locate);
 
 <style scoped>
 .here {
-  font-size: 1.05rem;
+  color: var(--ink);
+  font-size: 1.1rem;
 }
 
+/* Town Pass "Table item": white rows, 16px padding, Grey 100 divider inset 16px. */
 .list {
   list-style: none;
-  margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  border-top: 2px solid var(--line);
 }
 
 .list li {
-  border-bottom: 2px solid var(--line);
+  padding: 0 var(--gutter);
+}
+
+.list li:active {
+  background: var(--teal-tint);
+}
+
+.list li + li .row {
+  border-top: 1px solid var(--divider);
 }
 
 .row {
   width: 100%;
-  min-height: 4.4rem;
-  padding: 12px 4px;
+  min-height: 4.2rem;
+  padding: 14px 0;
   display: flex;
   align-items: center;
   gap: 16px;
   background: transparent;
   border: 0;
   text-align: left;
+  color: var(--ink);
   cursor: pointer;
 }
 
-.row:active {
-  background: var(--teal-tint);
+.row .chevron {
+  margin-left: auto;
+  color: var(--ink-soft);
 }
 
+/* Route number as a Town Pass tag (pill, primary border). */
 .chip {
   flex: none;
-  min-width: 4.2rem;
-  padding: 6px 10px;
-  border-radius: 10px;
-  background: var(--led-bg);
-  color: var(--led);
-  font-size: 1.6rem;
-  font-weight: 800;
+  min-width: 4rem;
+  padding: 4px 12px;
+  border-radius: 32px;
+  border: 1px solid var(--brand);
+  background: var(--teal-tint);
+  color: var(--teal);
+  font-size: 1.35rem;
+  font-weight: 700;
   text-align: center;
-  line-height: 1.1;
+  line-height: 1.2;
 }
 
 .row__text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .row__main {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .row__sub {
   color: var(--ink-soft);
-  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .row__sub--soon {
   color: var(--ok);
+  font-weight: 600;
 }
 
 .row--stop {
-  min-height: 3.8rem;
+  min-height: 3.6rem;
 }
 
 .row__count {
   flex: none;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.2rem;
+  height: 2.2rem;
   border-radius: 50%;
-  border: 2px solid var(--teal);
+  background: var(--teal-tint);
   color: var(--teal);
   display: grid;
   place-items: center;
-  font-weight: 800;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 </style>

@@ -97,7 +97,7 @@ onBeforeUnmount(() => unwatch?.());
 
     <p v-if="getOffNext" class="bell" role="note">下一站下車<br />請按下車鈴</p>
 
-    <ol class="strip" aria-label="接下來的站">
+    <ol class="card strip" aria-label="接下來的站">
       <li
         v-for="s in strip"
         :key="s.stopId"
@@ -126,36 +126,40 @@ onBeforeUnmount(() => unwatch?.());
   padding: 18px 16px;
   font-size: 2rem;
   line-height: 1.2;
-  font-weight: 900;
+  font-weight: 700;
   text-align: center;
 }
 
 .strip {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 6px;
+  padding: 12px var(--gutter);
   display: flex;
   flex-direction: column;
 }
 
+/* Three columns: a fixed rail column for the dot, the stop name, the tag.
+   The rail and every dot are centred on the same column, so nothing pokes out. */
 .strip li {
+  --rail-col: 28px;
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--rail-col) minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
+  column-gap: 14px;
   min-height: 3rem;
-  padding-left: 4px;
+  padding: 4px 0;
 }
 
 /* Rail line connecting the dots. */
 .strip li::before {
   content: '';
   position: absolute;
-  left: 13px;
+  left: calc(var(--rail-col) / 2 - 2px);
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--line);
+  background: var(--divider);
 }
 
 .strip li:first-child::before {
@@ -166,10 +170,14 @@ onBeforeUnmount(() => unwatch?.());
   bottom: 50%;
 }
 
+.strip li:only-child::before {
+  display: none;
+}
+
 .strip__dot {
   position: relative;
   z-index: 1;
-  flex: none;
+  justify-self: center;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -178,40 +186,42 @@ onBeforeUnmount(() => unwatch?.());
 }
 
 .strip__name {
+  grid-column: 2;
   font-size: 1.1rem;
   color: var(--ink-soft);
+  overflow-wrap: anywhere;
 }
 
 .strip__item--next .strip__dot {
-  border-color: var(--teal);
-  background: var(--teal);
+  border-color: var(--brand-fill);
+  background: var(--brand-fill);
 }
 
 .strip__item--next .strip__name {
   color: var(--ink);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .strip__item--dest .strip__dot {
+  width: var(--rail-col);
+  height: var(--rail-col);
   border-color: var(--ink);
   background: var(--led);
-  width: 26px;
-  height: 26px;
-  margin-left: -2px;
 }
 
 .strip__item--dest .strip__name {
   color: var(--ink);
-  font-weight: 800;
+  font-weight: 600;
   font-size: 1.25rem;
 }
 
 .strip__tag {
-  margin-left: auto;
+  grid-column: 3;
+  white-space: nowrap;
   font-size: 0.8rem;
-  font-weight: 800;
-  padding: 3px 10px;
-  border-radius: 999px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 32px;
   background: var(--ink);
   color: var(--paper);
 }
@@ -219,5 +229,6 @@ onBeforeUnmount(() => unwatch?.());
 .strip__tag--next {
   background: var(--teal-tint);
   color: var(--teal);
+  box-shadow: inset 0 0 0 1px var(--brand);
 }
 </style>

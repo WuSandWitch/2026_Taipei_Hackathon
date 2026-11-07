@@ -6,15 +6,20 @@
  * system as the Town Pass Open Source Gov Mobile App UI Kit on Figma Community.
  * Do not invent values here: add the missing step from tp_colors.dart instead.
  *
- * Layer 2 is the semantic role each screen actually uses. The roles exist
- * because the brand step is not always the readable step: Primary 500
- * (#5AB4C5) is only 2.39:1 on white, so it is used for brand surfaces while
- * text and controls drop to Primary 700 (5.89:1) or 800 (10.1:1). This service
- * is for blind and low-vision riders, so every role below is >= 4.5:1 against
- * its own background and was measured, not eyeballed.
+ * Layer 2 is the semantic role each screen actually uses, named after the UI
+ * kit's semantic colors (background light/dark, text primary/second, alarm,
+ * disable). The roles exist because the brand step is not always the readable
+ * step: Primary 500 (#5AB4C5) is only 2.39:1 against white, so it is kept for
+ * decoration (borders, progress, dots) while button fills and teal text drop to
+ * Primary 700 (5.9:1). This service is for blind and low-vision riders, so
+ * every text role is >= 4.5:1 against its background and was measured.
  *
- * Base type is deliberately larger than Town Pass defaults (body 14px):
- * 1rem = 20px here, and it still scales with the user's text-size setting.
+ * Layout follows the UI kit: grey page background (background-color/dark),
+ * white list sections with Grey 100 dividers, a white top navigation bar, and a
+ * white bottom action section with a soft shadow ("Section_one line text").
+ *
+ * Base type is larger than Town Pass defaults (body 14px): 1rem = 18px here,
+ * and it still scales with the user's text-size setting.
  * The LED route sign keeps its own black + amber tokens because it imitates a
  * real Taipei bus head sign.
  */
@@ -61,19 +66,27 @@
   --tp-white: #ffffff;
 
   /* --- Layer 2: semantic roles (light) --- */
-  --paper: var(--tp-white);
-  --surface: var(--tp-grayscale-50);
-  --ink: var(--tp-grayscale-900);        /* 17.3:1 on paper */
-  --ink-soft: var(--tp-grayscale-600);   /*  5.4:1 on paper */
+  --canvas: var(--tp-grayscale-50);      /* background-color/dark: page */
+  --paper: var(--tp-white);              /* background-color/light: sections, cards, bars */
+  --surface: var(--tp-grayscale-100);    /* disable-color: quiet buttons, wells */
+  --ink: var(--tp-grayscale-800);        /* text-color/primary, 11.6:1 on paper */
+  --ink-2: var(--tp-grayscale-700);      /* text-color/second,  8.2:1 on paper */
+  --ink-soft: var(--tp-grayscale-600);   /*  5.4:1 on paper (direction grey is too faint) */
   --line: var(--tp-grayscale-300);
-  --teal: var(--tp-primary-700);         /*  5.9:1 — brand, readable */
-  --teal-press: var(--tp-primary-800);
+  --divider: var(--tp-grayscale-100);    /* list item divider */
+  --brand: var(--tp-primary-500);        /* decoration only: borders, progress, dots */
+  --brand-fill: var(--tp-primary-700);   /* button fill, white text 5.9:1 */
+  --brand-press: var(--tp-primary-800);
+  --on-brand: var(--tp-white);
+  --teal: var(--tp-primary-700);         /* teal text, 5.9:1 on paper */
   --teal-tint: var(--tp-primary-50);
-  --on-teal: var(--tp-white);
   --ok: var(--tp-primary-700);           /* the palette has no green; success is brand teal */
   --ok-tint: var(--tp-primary-50);
-  --danger: var(--tp-red-600);           /*  5.5:1 on paper */
+  --danger: var(--tp-red-600);           /* alarm text, 5.5:1 on paper */
+  --danger-fill: var(--tp-red-500);      /* alarm-color/default */
   --danger-tint: var(--tp-red-50);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-bar: 0 0 6px rgba(0, 0, 0, 0.1);
 
   /* The route sign imitates a bus head sign; not part of the palette. */
   --led-bg: #000000;
@@ -85,9 +98,10 @@
   --focus: var(--tp-grayscale-900);
   --focus-halo: var(--tp-secondary-500);
 
-  --radius-lg: 22px;
-  --radius-md: 14px;
+  --radius-lg: 12px;
+  --radius-md: 8px;   /* Button/L, Button/m */
   --gutter: 16px;
+  --bar-h: 56px;      /* Top navigation */
 
   color-scheme: light;
 }
@@ -95,19 +109,27 @@
 /* --- Layer 2: semantic roles (dark) --- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: var(--tp-grayscale-950);
-    --surface: var(--tp-grayscale-900);
-    --ink: var(--tp-grayscale-50);        /* 15.7:1 on paper */
-    --ink-soft: var(--tp-grayscale-300);  /*  9.6:1 on paper */
+    --canvas: var(--tp-grayscale-950);
+    --paper: var(--tp-grayscale-900);
+    --surface: var(--tp-grayscale-800);
+    --ink: var(--tp-grayscale-50);        /* 15.1:1 on paper */
+    --ink-2: var(--tp-grayscale-100);
+    --ink-soft: var(--tp-grayscale-300);  /*  9.2:1 on paper */
     --line: var(--tp-grayscale-700);
-    --teal: var(--tp-primary-300);        /* 11.8:1 on paper */
-    --teal-press: var(--tp-primary-200);
+    --divider: var(--tp-grayscale-800);
+    --brand: var(--tp-primary-400);
+    --brand-fill: var(--tp-primary-300);
+    --brand-press: var(--tp-primary-200);
+    --on-brand: var(--tp-grayscale-950);
+    --teal: var(--tp-primary-300);        /* 11.3:1 on paper */
     --teal-tint: var(--tp-primary-900);
-    --on-teal: var(--tp-grayscale-950);
     --ok: var(--tp-primary-300);
     --ok-tint: var(--tp-primary-900);
-    --danger: var(--tp-red-300);          /*  8.3:1 on paper */
+    --danger: var(--tp-red-300);          /*  8.0:1 on paper */
+    --danger-fill: var(--tp-red-300);
     --danger-tint: var(--tp-red-900);
+    --shadow-card: none;
+    --shadow-bar: 0 0 0 1px var(--tp-grayscale-800);
     --focus: var(--tp-secondary-500);
     --focus-halo: var(--tp-grayscale-950);
     color-scheme: dark;
@@ -115,19 +137,27 @@
 }
 
 :root[data-theme='dark'] {
-  --paper: var(--tp-grayscale-950);
-  --surface: var(--tp-grayscale-900);
+  --canvas: var(--tp-grayscale-950);
+  --paper: var(--tp-grayscale-900);
+  --surface: var(--tp-grayscale-800);
   --ink: var(--tp-grayscale-50);
+  --ink-2: var(--tp-grayscale-100);
   --ink-soft: var(--tp-grayscale-300);
   --line: var(--tp-grayscale-700);
+  --divider: var(--tp-grayscale-800);
+  --brand: var(--tp-primary-400);
+  --brand-fill: var(--tp-primary-300);
+  --brand-press: var(--tp-primary-200);
+  --on-brand: var(--tp-grayscale-950);
   --teal: var(--tp-primary-300);
-  --teal-press: var(--tp-primary-200);
   --teal-tint: var(--tp-primary-900);
-  --on-teal: var(--tp-grayscale-950);
   --ok: var(--tp-primary-300);
   --ok-tint: var(--tp-primary-900);
   --danger: var(--tp-red-300);
+  --danger-fill: var(--tp-red-300);
   --danger-tint: var(--tp-red-900);
+  --shadow-card: none;
+  --shadow-bar: 0 0 0 1px var(--tp-grayscale-800);
   --focus: var(--tp-secondary-500);
   --focus-halo: var(--tp-grayscale-950);
   color-scheme: dark;
@@ -140,13 +170,13 @@
 }
 
 html {
-  font-size: 125%;
+  font-size: 112.5%;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--canvas);
   color: var(--ink);
   font-family: 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
   font-size: 1rem;
@@ -161,17 +191,17 @@ p {
   margin: 0;
 }
 
+/* Town Pass headings are semibold, never black-weight. */
 h1 {
   font-size: 1.5rem;
-  line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+  line-height: 1.33;
+  font-weight: 600;
 }
 
 h2 {
   font-size: 1.15rem;
-  line-height: 1.3;
-  font-weight: 700;
+  line-height: 1.375;
+  font-weight: 600;
 }
 
 button {
@@ -211,19 +241,73 @@ h2:focus {
 .page {
   max-width: 560px;
   margin: 0 auto;
-  padding: 8px var(--gutter) 24px;
+  padding: 20px var(--gutter) 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  min-height: calc(100dvh - 64px);
+  gap: 16px;
+  min-height: calc(100dvh - var(--bar-h));
 }
 
+/* Bottom action section ("Section_one line text_button/L" in the UI kit):
+   a white sheet pinned to the bottom with a soft shadow. */
 .page__actions {
-  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  /* Above any positioned content scrolling underneath (e.g. the stop dots). */
+  z-index: 5;
+  margin: auto calc(-1 * var(--gutter)) 0;
+  padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+  background: var(--paper);
+  box-shadow: var(--shadow-bar);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: env(safe-area-inset-bottom);
+  gap: 10px;
+}
+
+/* With very large text the pinned sheet would cover the content; let it scroll. */
+@media (max-height: 560px) {
+  .page__actions {
+    position: static;
+  }
+}
+
+/* One line of teal text above the buttons, as in the UI kit section. */
+.page__hint {
+  color: var(--teal);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* White section that bleeds to the screen edges (Table item). */
+.section {
+  margin: 0 calc(-1 * var(--gutter));
+  background: var(--paper);
+}
+
+/* "List item/title": small grey label above a section. */
+.section-title {
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: -8px;
+}
+
+/* White card (UI kit "card"). */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 24px var(--gutter);
+}
+
+/* Town Pass chevron (app/assets/svg/icon_arrow_right.svg), tinted by currentColor. */
+.chevron {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background-color: currentColor;
+  -webkit-mask: url('@/assets/icon_arrow_right.svg') center / contain no-repeat;
+  mask: url('@/assets/icon_arrow_right.svg') center / contain no-repeat;
 }
 
 .lede {

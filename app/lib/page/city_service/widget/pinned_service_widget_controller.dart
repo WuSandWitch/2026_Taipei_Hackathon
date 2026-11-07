@@ -4,10 +4,11 @@ import 'package:town_pass/page/city_service/model/my_service_model.dart';
 class PinnedServiceWidgetController extends GetxController {
   final RxList<MyServiceItemId> _pinnedList = RxList(
     [
+      // 預設釘 3 個 +「新增」剛好一排 4 格。原本的「市政資訊儀表板」標題太長，
+      // 被擠到第 4 欄會超出螢幕；它仍在「更多」與「熱門」裡。
       MyServiceItemId.busAssist,
       MyServiceItemId.locationSearch,
       MyServiceItemId.districtOffice,
-      MyServiceItemId.dashboard,
     ],
   );
 
