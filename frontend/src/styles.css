@@ -276,9 +276,17 @@ button {
   box-shadow: 0 0 0 7px var(--focus-halo);
 }
 
-h1:focus,
-h2:focus {
+/* Elements carrying tabindex="-1" are focusable by script only, never by Tab:
+   StepHeading moves focus to the heading when the step changes so a screen
+   reader announces it. They are not interactive, so they must paint no focus
+   indicator at all.
+   Clearing `outline` alone is not enough any more. With the two-tone ring the
+   amber halo lives in box-shadow, so the old `h1:focus { outline: none }` left
+   an orphan yellow box around every step heading with no dark ring in it. */
+[tabindex='-1']:focus,
+[tabindex='-1']:focus-visible {
   outline: none;
+  box-shadow: none;
 }
 
 .num {
