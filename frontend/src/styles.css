@@ -55,6 +55,15 @@
   --tp-grayscale-900: #171b1d;
   --tp-grayscale-950: #0b0d0e;
 
+  /* Orange. The kit's reminder-color family; absent until now, so every
+     reminder was borrowing the red alarm colour. */
+  --tp-orange-50: #fdf3ec;
+  --tp-orange-100: #fbe7d9;
+  --tp-orange-300: #f4b992;
+  --tp-orange-500: #fd853a;
+  --tp-orange-700: #ae501f;
+  --tp-orange-900: #391a06;
+
   --tp-red-50: #faeeee;
   --tp-red-200: #ebb6b6;
   --tp-red-300: #e29494;
@@ -82,16 +91,31 @@
   --teal-tint: var(--tp-primary-50);
   --ok: var(--tp-primary-700);           /* the palette has no green; success is brand teal */
   --ok-tint: var(--tp-primary-50);
+  /* reminder-color in the kit: a notice, not an alarm. Red stays for things
+     that are actually wrong (boarded the wrong bus). The kit's
+     reminder-color/default is 2.44:1 on white, so it fills shapes only and
+     text drops to Orange 700 (4.84:1 on the tint). */
+  --reminder: var(--tp-orange-700);
+  --reminder-fill: var(--tp-orange-500);  /* reminder-color/default */
+  --reminder-tint: var(--tp-orange-50);
   --danger: var(--tp-red-600);           /* alarm text, 5.5:1 on paper */
   --danger-fill: var(--tp-red-500);      /* alarm-color/default */
   --danger-tint: var(--tp-red-50);
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.04);
   --shadow-bar: 0 0 6px rgba(0, 0, 0, 0.1);
 
-  /* The route sign imitates a bus head sign; not part of the palette. */
+  /* Signage. The route sign imitates a bus head sign and the driver card is
+     held up to a bus driver in daylight, so these are deliberately outside the
+     palette AND outside the theme: they are defined once and never redefined
+     for dark mode, because a card that inverts would defeat its purpose.
+     Measured on black: dim text 11.2:1, text 21:1, amber 11.5:1. */
   --led-bg: #000000;
   --led: #ffb000;
   --led-soft: #ffd27a;
+  --led-ink: #000000;       /* text sitting on the amber */
+  --led-bezel: #1d1d1d;     /* the sign's inset frame */
+  --sign-ink: #ffffff;
+  --sign-ink-dim: #bdbdbd;
 
   /* Focus is two-tone: Secondary 500 alone is 1.75:1 on white and would be an
      unreliable focus indicator, so a dark ring carries the contrast. */
@@ -125,6 +149,9 @@
     --teal-tint: var(--tp-primary-900);
     --ok: var(--tp-primary-300);
     --ok-tint: var(--tp-primary-900);
+    --reminder: var(--tp-orange-300);     /*  9.2:1 on its tint */
+    --reminder-fill: var(--tp-orange-500);
+    --reminder-tint: var(--tp-orange-900);
     --danger: var(--tp-red-300);          /*  8.0:1 on paper */
     --danger-fill: var(--tp-red-300);
     --danger-tint: var(--tp-red-900);
@@ -153,6 +180,9 @@
   --teal-tint: var(--tp-primary-900);
   --ok: var(--tp-primary-300);
   --ok-tint: var(--tp-primary-900);
+  --reminder: var(--tp-orange-300);
+  --reminder-fill: var(--tp-orange-500);
+  --reminder-tint: var(--tp-orange-900);
   --danger: var(--tp-red-300);
   --danger-fill: var(--tp-red-300);
   --danger-tint: var(--tp-red-900);
@@ -170,6 +200,14 @@
 }
 
 html {
+  /* Deliberately larger and looser than the kit, for low-vision readers.
+     The kit's type scale, for reference, is:
+       H1 36/48  H2 24/32  H3 16/22  Body 14/20  Caption 12/18
+       weights: regular 400, semibold 600
+     Body at 14/20 is a 1.43 ratio; WCAG 1.4.12 asks for at least 1.5 on body
+     text, so ours is 1.5. Do not "correct" these back to the kit values — the
+     colour roles follow the kit, the type size does not, and that is the point.
+     Everything stays proportional to the user's own text-size setting. */
   font-size: 112.5%;
   -webkit-text-size-adjust: 100%;
 }
@@ -178,6 +216,9 @@ body {
   margin: 0;
   background: var(--canvas);
   color: var(--ink);
+  /* The kit's font variables say "PingFang SC"; we use TC on purpose, because
+     this is a Traditional Chinese service and CLAUDE.md specifies TC. The SC in
+     the kit is the designer's font menu, not an instruction. */
   font-family: 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.5;

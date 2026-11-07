@@ -37,8 +37,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: #000;
-  color: #fff;
+  background: var(--led-bg);
+  color: var(--sign-ink);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -49,7 +49,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 }
 
 .driver__hint {
-  color: #bdbdbd;
+  color: var(--sign-ink-dim);
   font-size: 1rem;
 }
 
@@ -77,9 +77,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
   min-height: 3.6rem;
   min-width: 60%;
   border-radius: var(--radius-md);
-  border: 3px solid #fff;
+  border: 3px solid var(--sign-ink);
   background: transparent;
-  color: #fff;
+  color: var(--sign-ink);
   font-size: 1.15rem;
   font-weight: 600;
   cursor: pointer;

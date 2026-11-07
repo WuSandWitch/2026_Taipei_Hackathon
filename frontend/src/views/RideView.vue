@@ -121,7 +121,7 @@ onBeforeUnmount(() => unwatch?.());
 <style scoped>
 .bell {
   background: var(--led);
-  color: #000;
+  color: var(--led-ink);
   border-radius: var(--radius-lg);
   padding: 18px 16px;
   font-size: 2rem;
