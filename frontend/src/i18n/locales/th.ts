@@ -2,7 +2,7 @@ import type { Strings } from '../types';
 
 // NEEDS NATIVE REVIEW — see src/i18n/index.ts
 export const th: Strings = {
-  appName: 'เพื่อนร่วมทางรถเมล์',
+  appName: 'Bussistant',
   tagline: 'ขึ้นรถเมล์คันที่ถูกต้องและลงป้ายที่ถูกต้อง โดยไม่ต้องอ่านป้าย',
 
   langHeading: 'เลือกภาษา',

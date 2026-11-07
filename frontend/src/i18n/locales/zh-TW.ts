@@ -1,7 +1,7 @@
 import type { Strings } from '../types';
 
 export const zhTW: Strings = {
-  appName: '公車陪你搭',
+  appName: '公車幫',
   tagline: '不用看站牌，也能搭對公車、在對的站下車。',
 
   langHeading: '選擇語言',

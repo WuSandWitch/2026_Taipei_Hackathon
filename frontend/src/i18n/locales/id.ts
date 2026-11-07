@@ -2,7 +2,7 @@ import type { Strings } from '../types';
 
 // NEEDS NATIVE REVIEW — see src/i18n/index.ts
 export const id: Strings = {
-  appName: 'Teman Naik Bus',
+  appName: 'Bussistant',
   tagline: 'Naik bus yang benar dan turun di halte yang benar, tanpa membaca papan halte.',
 
   langHeading: 'Pilih bahasa',

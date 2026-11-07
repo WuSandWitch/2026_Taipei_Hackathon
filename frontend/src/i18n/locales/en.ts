@@ -1,7 +1,7 @@
 import type { Strings } from '../types';
 
 export const en: Strings = {
-  appName: 'Bus Buddy',
+  appName: 'Bussistant',
   tagline: 'Catch the right bus and get off at the right stop, without reading the sign.',
 
   langHeading: 'Choose your language',

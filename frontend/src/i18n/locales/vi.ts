@@ -2,7 +2,7 @@ import type { Strings } from '../types';
 
 // NEEDS NATIVE REVIEW — see src/i18n/index.ts
 export const vi: Strings = {
-  appName: 'Bạn Đồng Hành Xe Buýt',
+  appName: 'Bussistant',
   tagline: 'Lên đúng xe buýt và xuống đúng trạm, không cần đọc bảng tên trạm.',
 
   langHeading: 'Chọn ngôn ngữ',

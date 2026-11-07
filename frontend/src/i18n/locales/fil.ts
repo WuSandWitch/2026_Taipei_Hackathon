@@ -2,7 +2,7 @@ import type { Strings } from '../types';
 
 // NEEDS NATIVE REVIEW — see src/i18n/index.ts
 export const fil: Strings = {
-  appName: 'Kasama sa Bus',
+  appName: 'Bussistant',
   tagline: 'Masakyan ang tamang bus at makababa sa tamang hintuan, kahit hindi mabasa ang karatula.',
 
   langHeading: 'Piliin ang wika',

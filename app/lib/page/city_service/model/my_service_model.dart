@@ -187,7 +187,7 @@ extension MyServiceIdExt on MyServiceItemId {
         ),
       MyServiceItemId.busAssist => MyServiceItem(
           title: BusAssistConfig.title,
-          description: '視障搭公車：等車提醒、確認上車、下車提醒',
+          description: '搭公車免看站牌：攔車、確認上車、下車提醒',
           // 「我的服務」用 24px 線條圖示（跟其他服務一致）；48px 實心圓圖示只給「熱門」用。
           icon: Assets.svg.iconBusAssist24.svg(),
           category: MyServiceCategory.cityLife,
