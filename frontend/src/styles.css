@@ -88,10 +88,18 @@
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.04);
   --shadow-bar: 0 0 6px rgba(0, 0, 0, 0.1);
 
-  /* The route sign imitates a bus head sign; not part of the palette. */
+  /* Signage. The route sign imitates a bus head sign and the driver card is
+     held up to a bus driver in daylight, so these are deliberately outside the
+     palette AND outside the theme: they are defined once and never redefined
+     for dark mode, because a card that inverts would defeat its purpose.
+     Measured on black: dim text 11.2:1, text 21:1, amber 11.5:1. */
   --led-bg: #000000;
   --led: #ffb000;
   --led-soft: #ffd27a;
+  --led-ink: #000000;       /* text sitting on the amber */
+  --led-bezel: #1d1d1d;     /* the sign's inset frame */
+  --sign-ink: #ffffff;
+  --sign-ink-dim: #bdbdbd;
 
   /* Focus is two-tone: Secondary 500 alone is 1.75:1 on white and would be an
      unreliable focus indicator, so a dark ring carries the contrast. */

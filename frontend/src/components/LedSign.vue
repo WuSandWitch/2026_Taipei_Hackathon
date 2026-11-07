@@ -37,7 +37,7 @@ defineProps<{
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: inset 0 0 0 3px #1d1d1d;
+  box-shadow: inset 0 0 0 3px var(--led-bezel);
 }
 
 .led__top {
