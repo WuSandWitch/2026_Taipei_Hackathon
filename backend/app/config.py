@@ -26,8 +26,12 @@ CITY = os.getenv("TDX_CITY", "Taipei").strip() or "Taipei"
 # Cloud Run supplies PORT.
 PORT = _int("PORT", 8080)
 
-# Comma-separated list, or "*" during development.
-ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",") if o.strip()]
+# Comma-separated list of frontend origins, or "*" during development.
+# An empty value falls back to "*" rather than to an empty list: a blank setting
+# would otherwise block every browser request with no hint as to why, and a
+# frontend that cannot call the backend is a worse failure than a permissive
+# default on a read-only public-data API.
+ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",") if o.strip()] or ["*"]
 
 # --- Cache lifetimes (seconds) ---
 # Realtime feeds (N1/A1/A2) are refreshed by TDX about once a minute. One cached

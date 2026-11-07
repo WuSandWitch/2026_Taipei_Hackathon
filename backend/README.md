@@ -52,6 +52,32 @@ gcloud run deploy bus-assist-api --source . --region asia-east1 \
 
 錯誤處理：TDX 失敗一律回 `503` + 中文 `detail`，前端保留上一個狀態並繼續輪詢。
 
+## CORS
+
+前端（`web.app` 或 `localhost:5173`）和 API（`run.app`）不同網域，所以一定要設 CORS。
+`ALLOWED_ORIGINS` **預設是 `*`，開箱就能跨網域呼叫**，本機開發不用設定。
+留空也會退回 `*`（空值會變成全部封鎖又不給任何提示，Demo 前最難 debug 的那種狀況）。
+
+正式部署想收緊的話用逗號分隔，**要含 scheme 和 port，不能用結尾萬用字元**：
+
+```bash
+gcloud run deploy bus-assist-api --source . --region asia-east1 \
+  --set-env-vars 'ALLOWED_ORIGINS=https://<前端網域>,http://localhost:5173'
+```
+
+環境變數優先於 `.env`（`load_dotenv()` 不覆寫既有環境變數），所以 Cloud Run 的
+`--set-env-vars` 會蓋掉檔案裡的值。
+
+自己驗證（有回 `access-control-allow-origin` 就是通的）：
+
+```bash
+curl -sD- -o /dev/null -H "Origin: http://localhost:5173" http://localhost:8080/healthz | grep -i access-control
+```
+
+實測：預設模式回 `*`；設成 `http://localhost:5173` 時，該來源回自己的 origin，
+其他來源不給標頭（瀏覽器端就會擋下來）。只開放 `GET`。沒有用 cookie，所以
+`allow_credentials` 是關閉的。
+
 ## 資料來源（TDX，全部對照 2026/11/07 的線上 OpenAPI spec 查證）
 
 spec：`https://tdx.transportdata.tw/webapi/File/Swagger/V3/2998e851-81d0-40f5-b26d-77e2f5ac4118`
