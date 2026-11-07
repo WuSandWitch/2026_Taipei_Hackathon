@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import LandingView from '@/views/LandingView.vue';
+import LanguageView from '@/views/LanguageView.vue';
+import DisplayView from '@/views/DisplayView.vue';
 import PlanView from '@/views/PlanView.vue';
 import WaitView from '@/views/WaitView.vue';
 import BoardCheckView from '@/views/BoardCheckView.vue';
@@ -13,7 +14,9 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior: () => ({ top: 0 }),
   routes: [
-    { path: '/', name: 'landing', component: LandingView },
+    // Two steps, one decision each: language, then text size.
+    { path: '/', name: 'language', component: LanguageView },
+    { path: '/setup', name: 'display', component: DisplayView },
     { path: '/plan', name: 'plan', component: PlanView },
     { path: '/wait', name: 'wait', component: WaitView, meta: { needsTrip: true } },
     { path: '/board', name: 'board', component: BoardCheckView, meta: { needsTrip: true } },
@@ -27,7 +30,7 @@ router.beforeEach((to) => {
   // Someone arriving with their language and mode already settled — a returning
   // user, or one who came in through a Town Pass card carrying ?profile= —
   // should not be asked again. See stores/profile.ts for the precedence rules.
-  if (to.name === 'landing' && profile.chosen) {
+  if (to.name === 'language' && profile.chosen) {
     return { name: 'plan', query: to.query };
   }
   // A reload mid-trip loses in-memory state; start over instead of showing an

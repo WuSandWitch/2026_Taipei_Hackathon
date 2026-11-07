@@ -9,9 +9,10 @@ import { s } from '@/i18n';
 const route = useRoute();
 const router = useRouter();
 
-const onTrip = computed(
-  () => route.name !== 'landing' && route.name !== 'plan' && route.name !== 'arrive'
-);
+// Setup steps and the planning screen are not a trip, so the bar's left slot
+// is the language entry there rather than the end-trip button.
+const SETUP_OR_IDLE = new Set(['language', 'display', 'plan', 'arrive']);
+const onTrip = computed(() => !SETUP_OR_IDLE.has(String(route.name)));
 
 // Ending a trip by accident is costly for a blind rider, so it takes two presses.
 const armed = ref(false);
@@ -54,7 +55,7 @@ onBeforeUnmount(() => {
       >
         {{ armed ? s.endTripArmed : s.endTrip }}
       </button>
-      <RouterLink v-else class="bar__end" :to="{ name: 'landing', query: route.query }">
+      <RouterLink v-else class="bar__end" :to="{ name: 'language', query: route.query }">
         {{ s.changeLang }}
       </RouterLink>
     </div>
