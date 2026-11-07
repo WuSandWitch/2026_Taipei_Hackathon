@@ -1,4 +1,4 @@
-# frontend — 公車陪你搭（視障公車輔助）微服務網頁
+# frontend — Bussistant 公車幫 微服務網頁
 
 在城市通 App 的 WebView 中執行。技術棧：**Vue 3 + Vite + TypeScript**（無 UI 框架，樣式用原生 CSS 變數）。
 開發規範見根目錄 `CLAUDE.md` 第 6 節。
@@ -49,7 +49,7 @@ src/
 
 ## 在城市通 App 的 WebView 裡執行
 
-服務已掛進 App：「服務」頁的「我的服務」第一個、「熱門」第一個都是「公車陪你搭」。網址由 `app/lib/util/bus_assist_config.dart` 的 `BUS_ASSIST_URL` 決定。
+服務已掛進 App：「服務」頁的「我的服務」第一個、「熱門」第一個都是「公車幫」。網址由 `app/lib/util/bus_assist_config.dart` 的 `BUS_ASSIST_URL` 決定。
 
 ```bash
 # 終端機 1：前端

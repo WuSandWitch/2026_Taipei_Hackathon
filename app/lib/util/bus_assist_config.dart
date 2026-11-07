@@ -1,4 +1,4 @@
-/// 「公車陪你搭」微服務設定。
+/// 「Bussistant 公車幫」微服務設定。
 ///
 /// 開發時用 --dart-define 指向本機的 Vite dev server（frontend/ 執行 npm run dev）：
 ///   iOS 模擬器：     flutter run --dart-define=BUS_ASSIST_URL=http://localhost:5173/
@@ -11,5 +11,5 @@ abstract final class BusAssistConfig {
     defaultValue: 'https://bus-assist-2026.web.app/',
   );
 
-  static const String title = '公車陪你搭';
+  static const String title = '公車幫';
 }

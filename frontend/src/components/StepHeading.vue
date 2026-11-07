@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '@/i18n';
 /**
  * Page heading that takes focus when shown, so screen readers announce the new
  * step right away. Also shows which of the four steps the rider is on, as text
@@ -29,7 +30,7 @@ watch(() => props.focusKey, focusHeading);
       <div class="heading__bar" aria-hidden="true">
         <span v-for="n in 4" :key="n" :class="{ on: n <= step }" />
       </div>
-      <p class="heading__step">第 {{ step }} 步，共 4 步</p>
+      <p class="heading__step">{{ t('stepOf', { n: step! }) }}</p>
     </template>
     <h1 ref="el" tabindex="-1"><slot /></h1>
   </div>

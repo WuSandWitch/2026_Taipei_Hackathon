@@ -12,6 +12,7 @@ import { getLocation } from '@/lib/bridge';
 import { say } from '@/lib/announcer';
 import { source, type RouteOption, type RouteStop } from '@/data';
 import { formatEta, resetTrip, trip, zhCount } from '@/stores/trip';
+import { s as L, spoken, t } from '@/i18n';
 
 type Phase = 'locating' | 'error' | 'route' | 'dest' | 'confirm';
 
@@ -33,10 +34,10 @@ async function locate() {
     trip.stop = await source.nearestStop(pos);
     routes.value = await source.routesAtStop(trip.stop.id);
     phase.value = 'route';
-    say(`你在${trip.stop.name}。這裡有${zhCount(routes.value.length)}條路線，請選擇要搭的公車。`);
+    say(t('sayAtStop', { stop: spoken(trip.stop.name, trip.stop.nameEn), n: zhCount(routes.value.length) }));
   } catch {
     phase.value = 'error';
-    say('找不到附近的站牌。請確認定位已開啟，再試一次。', { urgent: true });
+    say(t('sayNoStop'), { urgent: true });
   }
 }
 
@@ -45,13 +46,19 @@ async function pickRoute(r: RouteOption) {
   trip.route = r;
   trip.stopsAhead = await source.stopsAfter(r, trip.stop.id);
   phase.value = 'dest';
-  say(`${r.routeName}，往${r.headsign}。請選擇要在哪一站下車。`);
+  say(t('sayRoutePicked', { route: r.routeName, place: spoken(r.headsign, r.headsignEn) }));
 }
 
 function pickDest(s: RouteStop) {
   trip.destination = s;
   phase.value = 'confirm';
-  say(`搭${trip.route!.routeName}，在${s.name}下車，共${zhCount(stopsToGo.value)}站。確認的話，請按開始。`);
+  say(
+    t('sayDestPicked', {
+      route: trip.route!.routeName,
+      stop: spoken(s.name, s.nameEn),
+      n: zhCount(stopsToGo.value)
+    })
+  );
 }
 
 function backToRoutes() {
@@ -70,11 +77,11 @@ function start() {
 }
 
 function routeLabel(r: RouteOption) {
-  return `${r.routeName}，往${r.headsign}，${formatEta(r.etaSec)}`;
+  return t('routeAria', { route: r.routeName, place: r.headsign, eta: formatEta(r.etaSec) });
 }
 
 function destLabel(s: RouteStop, i: number) {
-  return `${s.name}，第${i + 1}站`;
+  return t('destAria', { stop: s.name, n: i + 1 });
 }
 
 onMounted(locate);
@@ -84,31 +91,31 @@ onMounted(locate);
   <div class="page">
     <!-- Locating -->
     <template v-if="phase === 'locating'">
-      <StepHeading :step="1" focus-key="locating">正在找你附近的站牌</StepHeading>
-      <p class="lede">請稍等，正在確認你的位置。</p>
+      <StepHeading :step="1" focus-key="locating">{{ L.locatingTitle }}</StepHeading>
+      <p class="lede">{{ L.locatingBody }}</p>
     </template>
 
     <!-- Error -->
     <template v-else-if="phase === 'error'">
-      <StepHeading :step="1" focus-key="error">找不到附近的站牌</StepHeading>
-      <p class="lede">請確認手機的定位已開啟，並允許城市通使用位置，再試一次。</p>
+      <StepHeading :step="1" focus-key="error">{{ L.noStopTitle }}</StepHeading>
+      <p class="lede">{{ L.noStopBody }}</p>
       <div class="page__actions">
-        <BigButton @click="locate">再試一次</BigButton>
+        <BigButton @click="locate">{{ L.retry }}</BigButton>
       </div>
     </template>
 
     <!-- Pick a route -->
     <template v-else-if="phase === 'route'">
-      <StepHeading :step="1" focus-key="route">要搭哪一路公車？</StepHeading>
+      <StepHeading :step="1" focus-key="route">{{ L.pickRouteTitle }}</StepHeading>
       <p class="section-title">
-        你在 <strong class="here">{{ trip.stop?.name }}</strong>
+        {{ L.youAreAt }} <strong class="here">{{ trip.stop?.name }}</strong>
       </p>
-      <ul class="section list" aria-label="這個站牌的公車">
+      <ul class="section list" :aria-label="L.routeListLabel">
         <li v-for="r in routes" :key="r.routeId + r.direction">
           <button type="button" class="row" :aria-label="routeLabel(r)" @click="pickRoute(r)">
             <span class="chip num" aria-hidden="true">{{ r.routeName }}</span>
             <span class="row__text" aria-hidden="true">
-              <span class="row__main">往 {{ r.headsign }}</span>
+              <span class="row__main">{{ t('toward', { place: r.headsign }) }}</span>
               <span class="row__sub" :class="{ 'row__sub--soon': (r.etaSec ?? 999) <= 180 }">{{ formatEta(r.etaSec) }}</span>
             </span>
             <span class="chevron" aria-hidden="true" />
@@ -116,17 +123,17 @@ onMounted(locate);
         </li>
       </ul>
       <div class="page__actions">
-        <BigButton variant="quiet" @click="locate">不是這個站牌？重新定位</BigButton>
+        <BigButton variant="quiet" @click="locate">{{ L.relocate }}</BigButton>
       </div>
     </template>
 
     <!-- Pick destination -->
     <template v-else-if="phase === 'dest'">
-      <StepHeading :step="1" focus-key="dest">在哪一站下車？</StepHeading>
+      <StepHeading :step="1" focus-key="dest">{{ L.pickDestTitle }}</StepHeading>
       <p class="section-title">
-        搭 <strong class="num here">{{ trip.route?.routeName }}</strong>，往{{ trip.route?.headsign }}
+        {{ t('takingRoute', { route: trip.route?.routeName ?? '', place: trip.route?.headsign ?? '' }) }}
       </p>
-      <ol class="section list" aria-label="下車站">
+      <ol class="section list" :aria-label="L.destListLabel">
         <li v-for="(s, i) in trip.stopsAhead" :key="s.stopId">
           <button type="button" class="row row--stop" :aria-label="destLabel(s, i)" @click="pickDest(s)">
             <span class="row__count num" aria-hidden="true">{{ i + 1 }}</span>
@@ -136,24 +143,26 @@ onMounted(locate);
         </li>
       </ol>
       <div class="page__actions">
-        <BigButton variant="quiet" @click="backToRoutes">重選公車</BigButton>
+        <BigButton variant="quiet" @click="backToRoutes">{{ L.backToRoutes }}</BigButton>
       </div>
     </template>
 
     <!-- Confirm -->
     <template v-else-if="phase === 'confirm' && trip.route && trip.destination">
-      <StepHeading :step="1" focus-key="confirm">確認這趟車</StepHeading>
+      <StepHeading :step="1" focus-key="confirm">{{ L.confirmTitle }}</StepHeading>
       <LedSign
         :route="trip.route.routeName"
         :headsign="trip.route.headsign"
-        :status="`到 ${trip.destination.name} 下車`"
-        :detail="`共 ${stopsToGo} 站，公車${formatEta(trip.route.etaSec)}到`"
+        :status="t('getOffAt', { stop: trip.destination.name })"
+        :detail="t('totalStops', { n: stopsToGo, eta: formatEta(trip.route.etaSec) })"
       />
-      <p class="lede">接下來會用語音和震動提醒你：車快到了、有沒有上對車、什麼時候下車。</p>
+      <p class="lede">{{ L.confirmBody }}</p>
       <div class="page__actions">
-        <p class="page__hint" aria-hidden="true">共 {{ stopsToGo }} 站・在 {{ trip.destination.name }} 下車</p>
-        <BigButton @click="start">開始，陪我搭車</BigButton>
-        <BigButton variant="secondary" @click="backToDest">重選下車站</BigButton>
+        <p class="page__hint" aria-hidden="true">
+          {{ t('confirmHint', { n: stopsToGo, stop: trip.destination.name }) }}
+        </p>
+        <BigButton @click="start">{{ L.startTrip }}</BigButton>
+        <BigButton variant="secondary" @click="backToDest">{{ L.backToDest }}</BigButton>
       </div>
     </template>
   </div>

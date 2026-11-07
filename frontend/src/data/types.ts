@@ -7,6 +7,9 @@
 export interface BusStop {
   id: string;
   name: string;
+  /** Romanised name, for speech only — the screen always shows `name`, which
+   *  is what the physical stop sign says. Empty when TDX has no English. */
+  nameEn?: string;
   lat: number;
   lng: number;
 }
@@ -20,6 +23,8 @@ export interface RouteOption {
   direction: 0 | 1;
   /** Where the bus is heading, e.g. "板橋前站". */
   headsign: string;
+  /** Romanised headsign, for speech only. */
+  headsignEn?: string;
   /** Seconds until the next bus reaches the user's stop; null if unknown / no service. */
   etaSec: number | null;
 }
@@ -28,6 +33,8 @@ export interface RouteOption {
 export interface RouteStop {
   stopId: string;
   name: string;
+  /** Romanised name, for speech only. */
+  nameEn?: string;
   /** Stop sequence on the route. */
   seq: number;
 }

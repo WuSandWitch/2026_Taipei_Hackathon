@@ -1,5 +1,5 @@
 """
-Bus-assist API — proxies TDX bus data for the 公車陪你搭 micro-service page.
+Bussistant API — proxies TDX bus data for the 公車幫 micro-service page.
 
 The HTTP contract is the one documented in frontend/README.md: the frontend's
 `src/data/api.ts` talks to exactly these six paths and expects the shapes in
@@ -39,9 +39,9 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="Bus Assist API",
+    title="Bussistant API",
     version="0.1.0",
-    description="視障者公車搭乘助手的後端。資料來源：TDX 運輸資料流通服務。",
+    description="Bussistant 公車幫的後端。資料來源：TDX 運輸資料流通服務。",
     lifespan=lifespan,
 )
 

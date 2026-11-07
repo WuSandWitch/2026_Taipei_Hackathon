@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 部署「公車陪你搭」到 Cloud Run（後端）+ Firebase Hosting（前端）。
+# 部署「Bussistant 公車幫」到 Cloud Run（後端）+ Firebase Hosting（前端）。
 #
 # 順序是刻意的，不要調換：
 #   1. 後端先上，才拿得到它的 HTTPS 網址。

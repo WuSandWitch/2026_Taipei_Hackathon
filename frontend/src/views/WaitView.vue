@@ -13,7 +13,7 @@ import { repeatLast, say, Vibe } from '@/lib/announcer';
 import { notify } from '@/lib/bridge';
 import { source, type ArrivalUpdate } from '@/data';
 import { formatEta, trip, zhCount } from '@/stores/trip';
-import { s as t } from '@/i18n';
+import { s as L, t } from '@/i18n';
 
 const router = useRouter();
 const route = useRoute();
@@ -27,11 +27,11 @@ const a = computed(() => trip.arrival);
 
 const status = computed(() => {
   const u = a.value;
-  if (!u) return '查詢中';
-  if (u.status === 'at_stop') return '車子到了';
-  if (u.status === 'arriving') return '即將進站';
-  if (u.status === 'departed') return '剛開走了';
-  if (u.status === 'no_service') return '目前沒有班次';
+  if (!u) return L.value.statusChecking;
+  if (u.status === 'at_stop') return L.value.statusAtStop;
+  if (u.status === 'arriving') return L.value.statusArriving;
+  if (u.status === 'departed') return L.value.statusDeparted;
+  if (u.status === 'no_service') return L.value.statusNoService;
   return formatEta(u.etaSec);
 });
 
@@ -56,14 +56,14 @@ function onUpdate(u: ArrivalUpdate) {
   // A different bus pulling in: the moment blind riders most often board the wrong bus.
   const o = u.otherArriving.filter((n) => n !== name).join('、');
   if (o && o !== lastOthers) {
-    say(`進站的是${o}，不是你要的${name}，請繼續等。`, { urgent: true, vibe: Vibe.warning });
+    say(t('sayOtherBus', { others: o, route: name }), { urgent: true, vibe: Vibe.warning });
   }
   lastOthers = o;
 
   if (u.status === 'at_stop') {
     once('at_stop', () => {
-      say(`${name}到了，就在站牌前。上車後，請按「我上車了」。`, { urgent: true, vibe: Vibe.arriving });
-      notify(`${name} 到站了`, '上車後請在城市通按「我上車了」');
+      say(t('sayArrived', { route: name }), { urgent: true, vibe: Vibe.arriving });
+      notify(t('notifyArrivedTitle', { route: name }), L.value.notifyArrivedBody);
     });
     return;
   }
@@ -72,17 +72,17 @@ function onUpdate(u: ArrivalUpdate) {
     fired.delete('arriving');
     fired.delete('1min');
     fired.delete('3min');
-    say(`${name}已經開走了。我們會繼續幫你等下一班。`, { urgent: true, vibe: Vibe.warning });
+    say(t('sayDeparted', { route: name }), { urgent: true, vibe: Vibe.warning });
     return;
   }
   if (u.status === 'arriving') {
-    once('arriving', () => say(`${name}即將進站，請準備上車。`, { urgent: true, vibe: Vibe.arriving }));
+    once('arriving', () => say(t('sayArriving', { route: name }), { urgent: true, vibe: Vibe.arriving }));
     return;
   }
   const eta = u.etaSec;
   if (eta === null) return;
-  if (eta <= 60) once('1min', () => say(`${name}大約一分鐘後到，請到站牌前準備。`, { vibe: Vibe.tick }));
-  else if (eta <= 180) once('3min', () => say(`${name}大約${zhCount(Math.round(eta / 60))}分鐘後到。`));
+  if (eta <= 60) once('1min', () => say(t('sayOneMin', { route: name }), { vibe: Vibe.tick }));
+  else if (eta <= 180) once('3min', () => say(t('sayMins', { route: name, n: zhCount(Math.round(eta / 60)) })));
 }
 
 function boarded() {
@@ -91,7 +91,7 @@ function boarded() {
 
 onMounted(() => {
   const eta = trip.route?.etaSec;
-  say(`開始等車。${r.value.routeName}${formatEta(eta)}到站，車快到時會提醒你。`);
+  say(t('sayWaitStart', { route: r.value.routeName, eta: formatEta(eta) }));
   unwatch = source.watchArrival(r.value, trip.stop!.id, onUpdate);
 });
 onBeforeUnmount(() => unwatch?.());
@@ -99,24 +99,26 @@ onBeforeUnmount(() => unwatch?.());
 
 <template>
   <div class="page">
-    <StepHeading :step="2">在站牌等 {{ r.routeName }}</StepHeading>
+    <StepHeading :step="2">{{ t('waitTitle', { route: r.routeName }) }}</StepHeading>
 
     <LedSign
       :route="r.routeName"
       :headsign="r.headsign"
       :status="status"
-      :detail="trip.plate ? `車牌 ${trip.plate}` : undefined"
+      :detail="trip.plate ? t('plateIs', { plate: trip.plate }) : undefined"
     />
 
     <p v-if="others.length" class="warn" role="note">
-      進站的是 <strong class="num">{{ others.join('、') }}</strong>，不是你要的車
+      {{ t('notYourBus', { others: others.join('、') }) }}
     </p>
-    <p v-else class="lede">在 {{ trip.destination?.name }} 下車。車快到、車到站時，會用語音和震動提醒你。</p>
+    <p v-else class="lede">{{ t('waitBody', { stop: trip.destination?.name ?? '' }) }}</p>
 
     <div class="page__actions">
-      <BigButton v-if="canFlagDown" @click="showDriverCard = true">{{ t.showDriver }}</BigButton>
-      <BigButton :variant="a?.status === 'at_stop' ? 'primary' : 'secondary'" @click="boarded">我上車了</BigButton>
-      <BigButton variant="quiet" @click="repeatLast">再說一次</BigButton>
+      <BigButton v-if="canFlagDown" @click="showDriverCard = true">{{ L.showDriver }}</BigButton>
+      <BigButton :variant="a?.status === 'at_stop' ? 'primary' : 'secondary'" @click="boarded">
+        {{ L.iBoarded }}
+      </BigButton>
+      <BigButton variant="quiet" @click="repeatLast">{{ L.sayAgain }}</BigButton>
     </div>
   </div>
 

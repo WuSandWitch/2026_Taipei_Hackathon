@@ -3,6 +3,7 @@
  *   1. plan (stop → route → destination)  2. wait  3. board check  4. ride
  */
 import { computed, reactive } from 'vue';
+import { locale, t } from '@/i18n';
 import type { ArrivalUpdate, BoardCheck, BusStop, RidePosition, RouteOption, RouteStop } from '@/data';
 
 export const trip = reactive({
@@ -47,14 +48,18 @@ export function resetTrip(keepStop = true): void {
 }
 
 export function formatEta(sec: number | null | undefined): string {
-  if (sec === null || sec === undefined) return '暫無資料';
-  if (sec <= 30) return '即將進站';
-  const min = Math.round(sec / 60);
-  return `約 ${min} 分鐘`;
+  if (sec === null || sec === undefined) return t('etaNone');
+  if (sec <= 30) return t('etaSoon');
+  return t('etaMin', { min: Math.round(sec / 60) });
 }
 
-/** Number → spoken Chinese for small counts (一, 兩, 三 …), so TTS reads naturally. */
+/**
+ * Small counts as Chinese numerals, so a zh-TW voice reads 兩條 rather than
+ * spelling out a digit. Every other language keeps digits: 二/兩 has no
+ * equivalent problem there, and a Vietnamese voice handles "2" correctly.
+ */
 export function zhCount(n: number): string {
+  if (locale.value !== 'zh-TW') return String(n);
   const map = ['零', '一', '兩', '三', '四', '五', '六', '七', '八', '九', '十'];
   return n >= 0 && n <= 10 ? map[n]! : String(n);
 }
