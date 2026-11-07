@@ -10,11 +10,16 @@ export interface Strings {
   appName: string;
   tagline: string;
 
+  /** Step 1 of 2: language. */
   langHeading: string;
   langHint: string;
 
-  modeHeading: string;
-  modeHint: string;
+  /** Step 2 of 2: text size and read-aloud. */
+  displayHeading: string;
+  displayHint: string;
+  /** A real sentence from the service, rendered at the size being chosen, so
+   *  the choice is made by looking at the result rather than at a label. */
+  preview: string;
   modeStandard: string;
   modeStandardHint: string;
   modeLarge: string;
@@ -22,8 +27,17 @@ export interface Strings {
   modeVoice: string;
   modeVoiceHint: string;
 
+  next: string;
+  back: string;
   start: string;
   changeLang: string;
+
+  /** Flagging the bus down. The card's driver-facing text is deliberately NOT
+   *  in here: it is always Chinese, because the person reading it is a Taipei
+   *  bus driver. Only the rider-facing instruction is translated. */
+  showDriver: string;
+  driverHint: string;
+  close: string;
 
   /** Chrome that stays visible during a trip. */
   voiceToggle: string;

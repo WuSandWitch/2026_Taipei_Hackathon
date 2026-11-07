@@ -33,7 +33,7 @@ export type Mode = 'standard' | 'large' | 'voice';
 const MODES: Mode[] = ['standard', 'large', 'voice'];
 const PROFILES: Record<string, Mode> = {
   general: 'standard',
-  newresident: 'standard',
+  newresident: 'large',
   lowvision: 'large',
   blind: 'voice'
 };
@@ -59,9 +59,16 @@ function write(key: string, value: string): void {
 
 const isMode = (v: unknown): v is Mode => typeof v === 'string' && MODES.includes(v as Mode);
 
+/** Large is the default, not standard. Someone who needs bigger text cannot
+ *  read a small-text screen well enough to find the setting that makes it
+ *  bigger — the first screen has to already be legible to the person most
+ *  likely to struggle with it. Anyone who wants smaller text can see the
+ *  option fine and step down. */
+export const DEFAULT_MODE: Mode = 'large';
+
 export const profile = reactive({
   locale: DEFAULT_LOCALE as LocaleCode,
-  mode: 'standard' as Mode,
+  mode: DEFAULT_MODE as Mode,
   /** True once the person (or their card) has settled both dimensions. */
   chosen: false
 });
@@ -117,7 +124,7 @@ export function initProfile(search: string = window.location.search): boolean {
   const modeSettled = isMode(paramMode) || profileMode !== undefined || isMode(storedMode);
   const mode = isMode(paramMode)
     ? paramMode
-    : (profileMode ?? (isMode(storedMode) ? storedMode : 'standard'));
+    : (profileMode ?? (isMode(storedMode) ? storedMode : DEFAULT_MODE));
 
   profile.locale = lang;
   profile.mode = mode;

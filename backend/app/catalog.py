@@ -39,6 +39,8 @@ class RouteInfo:
     name: str
     departure: str
     destination: str
+    departure_en: str = ""
+    destination_en: str = ""
 
     def headsign(self, direction: int) -> str:
         """Where a bus in this direction is going (0 = 去程, 1 = 返程)."""
@@ -50,6 +52,18 @@ def _zh(name: object) -> str:
     if isinstance(name, dict):
         return str(name.get("Zh_tw") or name.get("En") or "")
     return str(name or "")
+
+
+def _en(name: object) -> str:
+    """
+    TDX NameType -> English, empty when TDX has none.
+
+    Only used for speech. The screen always shows the Chinese name, because the
+    rider has to match it against the physical stop sign; a speech engine set to
+    vi/th/fil cannot pronounce Chinese characters at all, so the spoken form
+    needs a romanised one. Two channels, two forms of the same name.
+    """
+    return str(name.get("En") or "") if isinstance(name, dict) else ""
 
 
 # --- stations ------------------------------------------------------------
@@ -104,7 +118,10 @@ async def station_by_id(station_uid: str) -> Station | None:
 async def _load_routes() -> dict[str, RouteInfo]:
     rows = await tdx.get(
         f"/v2/Bus/Route/City/{_CITY}",
-        {"$select": "RouteUID,RouteName,DepartureStopNameZh,DestinationStopNameZh"},
+        {
+            "$select": "RouteUID,RouteName,DepartureStopNameZh,DestinationStopNameZh,"
+            "DepartureStopNameEn,DestinationStopNameEn"
+        },
     )
     index: dict[str, RouteInfo] = {}
     for row in rows if isinstance(rows, list) else []:
@@ -116,6 +133,8 @@ async def _load_routes() -> dict[str, RouteInfo]:
             name=_zh(row.get("RouteName")),
             departure=str(row.get("DepartureStopNameZh") or ""),
             destination=str(row.get("DestinationStopNameZh") or ""),
+            departure_en=str(row.get("DepartureStopNameEn") or ""),
+            destination_en=str(row.get("DestinationStopNameEn") or ""),
         )
     return index
 
@@ -169,6 +188,7 @@ async def _load_stop_sequences() -> dict[tuple[str, int], list[dict]]:
                 {
                     "stopUid": stop.get("StopUID", ""),
                     "name": _zh(stop.get("StopName")),
+                    "nameEn": _en(stop.get("StopName")),
                     "seq": int(stop.get("StopSequence", 0)),
                     "lat": pos.get("PositionLat"),
                     "lng": pos.get("PositionLon"),
@@ -210,6 +230,40 @@ async def headsign(route_uid: str, direction: int) -> str:
         return stops[-1]["name"]
     info = await route_info(route_uid)
     return info.headsign(direction) if info else ""
+
+
+async def headsign_en(route_uid: str, direction: int) -> str:
+    """English terminus for speech. Same rule as `headsign`: the last stop of
+    the direction's sequence, falling back to the route metadata."""
+    try:
+        stops = await stops_of_route(route_uid, direction)
+    except TdxError:
+        stops = []
+    if stops and stops[-1].get("nameEn"):
+        return str(stops[-1]["nameEn"])
+    info = await route_info(route_uid)
+    if info is None:
+        return ""
+    return info.destination_en if direction == 0 else info.departure_en
+
+
+async def stop_name_en(stop_uids: tuple[str, ...]) -> str:
+    """
+    English name for a station, resolved from the stop sequences we already
+    hold. Station.StationName.En is empty for Taipei, but the same place does
+    carry an English name on its individual stops, so no extra API call is
+    needed — just a lookup across the cached sequences.
+    """
+    try:
+        index = await stop_sequences()
+    except TdxError:
+        return ""
+    here = set(stop_uids)
+    for stops in index.values():
+        for stop in stops:
+            if stop["stopUid"] in here and stop.get("nameEn"):
+                return str(stop["nameEn"])
+    return ""
 
 
 async def warm_up() -> None:

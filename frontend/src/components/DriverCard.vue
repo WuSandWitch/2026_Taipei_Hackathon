@@ -1,9 +1,18 @@
 <script setup lang="ts">
 /**
- * Full-screen card the rider holds up toward the bus driver.
+ * Full-screen card the rider holds up to flag the bus down. In Taipei a bus
+ * only stops if you signal it, so this is the moment the service exists for —
+ * which is why WaitView only offers it once the bus is close enough for a
+ * driver to see it, rather than as a button that is always sitting there.
+ *
+ * The driver-facing text is hardcoded Chinese and is NOT translated. The person
+ * reading it is a Taipei bus driver; a Vietnamese card helps nobody. Only the
+ * instruction to the rider follows their own language.
+ *
  * Maximum contrast, no motion, no flashing.
  */
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { s } from '@/i18n';
 
 defineProps<{ route: string }>();
 const emit = defineEmits<{ close: [] }>();
@@ -24,11 +33,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 
 <template>
   <div class="driver" role="dialog" aria-modal="true" aria-labelledby="driver-card-title">
-    <p class="driver__hint">把螢幕朝向司機</p>
-    <h1 id="driver-card-title" class="driver__route num">{{ route }}</h1>
-    <p class="driver__msg">我要搭這班車</p>
-    <p class="driver__sub">我看不見，請等我上車，謝謝</p>
-    <button ref="closeBtn" type="button" class="driver__close" @click="emit('close')">關閉</button>
+    <!-- Rider-facing: their language. -->
+    <p class="driver__hint">{{ s.driverHint }}</p>
+
+    <!-- Driver-facing: always Chinese, whatever the rider chose. -->
+    <h1 id="driver-card-title" class="driver__route num" lang="zh-TW">{{ route }}</h1>
+    <p class="driver__msg" lang="zh-TW">我要搭這班，請停車</p>
+    <p class="driver__sub" lang="zh-TW">謝謝您</p>
+
+    <button ref="closeBtn" type="button" class="driver__close" @click="emit('close')">
+      {{ s.close }}
+    </button>
   </div>
 </template>
 

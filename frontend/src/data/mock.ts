@@ -103,9 +103,9 @@ export const mockSource: BusDataSource = {
   async checkBoarded(): Promise<BoardCheck> {
     await wait(1800);
     if (FORCE_WRONG) {
-      return { onBus: false, reason: '你的位置沒有跟著 307 移動，可能搭到別的車。' };
+      return { onBus: false, status: 'wrong_bus', reason: '你的位置沒有跟著 307 移動，可能搭到別的車。' };
     }
-    return { onBus: true, plate: MOCK_PLATE };
+    return { onBus: true, status: 'on_board', plate: MOCK_PLATE };
   },
 
   watchRide(_route, plate, fromSeq, cb) {

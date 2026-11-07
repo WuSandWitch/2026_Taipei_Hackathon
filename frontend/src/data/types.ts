@@ -43,8 +43,17 @@ export interface ArrivalUpdate {
   otherArriving: string[];
 }
 
+/**
+ * `unknown` is not `wrong_bus`. Failing to find the vehicle is not evidence of
+ * being on the wrong one — A1 positions lag 15-60 s, so right after boarding
+ * "we cannot tell yet" is the normal answer. The two must look different on
+ * screen, or we send people off a perfectly good bus.
+ */
+export type BoardStatus = 'on_board' | 'wrong_bus' | 'unknown';
+
 export interface BoardCheck {
   onBus: boolean;
+  status?: BoardStatus;
   plate?: string;
   /** Plain-language reason when we couldn't confirm. */
   reason?: string;

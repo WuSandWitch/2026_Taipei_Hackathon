@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import LandingView from '@/views/LandingView.vue';
+import LanguageView from '@/views/LanguageView.vue';
+import DisplayView from '@/views/DisplayView.vue';
 import PlanView from '@/views/PlanView.vue';
 import WaitView from '@/views/WaitView.vue';
 import BoardCheckView from '@/views/BoardCheckView.vue';
@@ -13,7 +14,9 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior: () => ({ top: 0 }),
   routes: [
-    { path: '/', name: 'landing', component: LandingView },
+    // Two steps, one decision each: language, then text size.
+    { path: '/', name: 'language', component: LanguageView },
+    { path: '/setup', name: 'display', component: DisplayView },
     { path: '/plan', name: 'plan', component: PlanView },
     { path: '/wait', name: 'wait', component: WaitView, meta: { needsTrip: true } },
     { path: '/board', name: 'board', component: BoardCheckView, meta: { needsTrip: true } },
@@ -23,11 +26,14 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to) => {
-  // Someone arriving with their language and mode already settled — a returning
-  // user, or one who came in through a Town Pass card carrying ?profile= —
-  // should not be asked again. See stores/profile.ts for the precedence rules.
-  if (to.name === 'landing' && profile.chosen) {
+router.beforeEach((to, from) => {
+  // Skip the setup steps only on the way in — a returning user, or someone
+  // entering through a Town Pass card carrying ?profile=. Once the app is
+  // running, tapping "語言與字體" has to actually open them: redirecting a
+  // deliberate navigation makes the control look broken.
+  // from.matched is empty only on the very first navigation.
+  const firstLoad = from.matched.length === 0;
+  if (to.name === 'language' && profile.chosen && firstLoad) {
     return { name: 'plan', query: to.query };
   }
   // A reload mid-trip loses in-memory state; start over instead of showing an
