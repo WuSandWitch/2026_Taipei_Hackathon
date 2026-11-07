@@ -28,7 +28,11 @@ class TrendingServiceWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 7.0),
-          Table(children: _tableRowList),
+          // 左右留 16px，跟上方「熱門」標題對齊，左欄圖示才不會貼到螢幕邊緣。
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Table(children: _tableRowList),
+          ),
         ],
       ),
     );
