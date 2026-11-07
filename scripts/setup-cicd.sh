@@ -18,43 +18,68 @@ SA_NAME="github-deployer"
 [ -n "$PROJECT" ] && [ "$PROJECT" != "(unset)" ] || { echo "❌ 先設定專案：gcloud config set project <id>" >&2; exit 1; }
 PNUM="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')"
 SA="${SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
-echo "專案 $PROJECT（號碼 $PNUM）   repo $REPO"
+echo "專案 ${PROJECT}（號碼 ${PNUM}）   repo $REPO"
 
 echo "▸ 啟用需要的 API"
 gcloud services enable iamcredentials.googleapis.com sts.googleapis.com iam.googleapis.com \
   cloudresourcemanager.googleapis.com --project "$PROJECT"
 
-echo "▸ 建立 service account（已存在就略過）"
-gcloud iam service-accounts create "$SA_NAME" \
-  --display-name="GitHub Actions deployer" --project "$PROJECT" 2>/dev/null \
-  || echo "   （已存在）"
+# 不要用 `|| echo 已存在` 吞掉錯誤：權限不足也會長得像「已存在」，然後在後面
+# 莫名失敗。一律先查，真的不存在才建立，建立失敗就讓它停下來。
+echo "▸ 建立 service account"
+if gcloud iam service-accounts describe "$SA" --project "$PROJECT" >/dev/null 2>&1; then
+  echo "   （已存在，略過）"
+else
+  gcloud iam service-accounts create "$SA_NAME" \
+    --display-name="GitHub Actions deployer" --project "$PROJECT"
+  echo "   ✅ 已建立"
+fi
 
 echo "▸ 授權"
 # run.admin：部署 Cloud Run；serviceAccountUser：以執行身分啟動服務；
 # cloudbuild + artifactregistry + storage：--source 部署會用 Cloud Build 建 image；
 # firebasehosting.admin：部署前端。
+#
+# firebase.viewer 是後來補的：firebase-tools 在部署前會先打 serviceusage API 查
+# 「Hosting API 有沒有啟用」，少了 serviceusage.services.get 就會在那一步 403：
+#     Permission denied to get service [firebasehosting.googleapis.com]
+# firebasehosting.admin 不含這個權限。firebase.viewer 同時給 serviceusage.services.get
+# 和 firebase.projects.get（firebase-tools 也要讀專案資訊），所以一個角色就夠，
+# 不需要再加 serviceusage.serviceUsageViewer。
 for role in roles/run.admin roles/iam.serviceAccountUser roles/cloudbuild.builds.editor \
-            roles/artifactregistry.writer roles/storage.admin roles/firebasehosting.admin; do
+            roles/artifactregistry.writer roles/storage.admin roles/firebasehosting.admin \
+            roles/firebase.viewer; do
   gcloud projects add-iam-policy-binding "$PROJECT" \
     --member="serviceAccount:${SA}" --role="$role" --condition=None >/dev/null
   echo "   ✅ $role"
 done
 
-echo "▸ 建立 Workload Identity Pool 與 Provider（已存在就略過）"
-gcloud iam workload-identity-pools create "$POOL" \
-  --location=global --display-name="GitHub Actions" --project "$PROJECT" 2>/dev/null \
-  || echo "   （pool 已存在）"
+echo "▸ 建立 Workload Identity Pool"
+if gcloud iam workload-identity-pools describe "$POOL" \
+     --location=global --project "$PROJECT" >/dev/null 2>&1; then
+  echo "   （已存在，略過）"
+else
+  gcloud iam workload-identity-pools create "$POOL" \
+    --location=global --display-name="GitHub Actions" --project "$PROJECT"
+  echo "   ✅ 已建立"
+fi
 
 # attribute-condition 把這個 provider 鎖死在我們這個 repo。沒有它的話，
 # 任何 GitHub repo 都能拿 token 來換取你專案的權限。
-gcloud iam workload-identity-pools providers create-oidc "$PROVIDER" \
-  --location=global --workload-identity-pool="$POOL" \
-  --display-name="GitHub OIDC" \
-  --issuer-uri="https://token.actions.githubusercontent.com" \
-  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
-  --attribute-condition="assertion.repository=='${REPO}'" \
-  --project "$PROJECT" 2>/dev/null \
-  || echo "   （provider 已存在）"
+echo "▸ 建立 OIDC Provider"
+if gcloud iam workload-identity-pools providers describe "$PROVIDER" \
+     --location=global --workload-identity-pool="$POOL" --project "$PROJECT" >/dev/null 2>&1; then
+  echo "   （已存在，略過。若要改 attribute-condition 請用 update-oidc）"
+else
+  gcloud iam workload-identity-pools providers create-oidc "$PROVIDER" \
+    --location=global --workload-identity-pool="$POOL" \
+    --display-name="GitHub OIDC" \
+    --issuer-uri="https://token.actions.githubusercontent.com" \
+    --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+    --attribute-condition="assertion.repository=='${REPO}'" \
+    --project "$PROJECT"
+  echo "   ✅ 已建立（已鎖定只有 $REPO 能使用）"
+fi
 
 echo "▸ 允許這個 repo 冒用 service account"
 gcloud iam service-accounts add-iam-policy-binding "$SA" \
@@ -75,6 +100,21 @@ else
   echo "   ⚠️ 沒有 gh CLI，請到 GitHub › Settings › Secrets and variables › Actions › Variables 手動加："
   printf '      GCP_PROJECT_ID   = %s\n      GCP_WIF_PROVIDER = %s\n      GCP_DEPLOY_SA    = %s\n' "$PROJECT" "$WIF" "$SA"
 fi
+
+echo "▸ 驗證最終狀態"
+FAIL=0
+gcloud iam service-accounts describe "$SA" --project "$PROJECT" >/dev/null 2>&1 \
+  && echo "   ✅ service account" || { echo "   ❌ service account 不存在"; FAIL=1; }
+gcloud iam workload-identity-pools providers describe "$PROVIDER" \
+  --location=global --workload-identity-pool="$POOL" --project "$PROJECT" >/dev/null 2>&1 \
+  && echo "   ✅ workload identity provider" || { echo "   ❌ provider 不存在"; FAIL=1; }
+if command -v gh >/dev/null; then
+  for v in GCP_PROJECT_ID GCP_WIF_PROVIDER GCP_DEPLOY_SA; do
+    gh variable list --repo "$REPO" 2>/dev/null | grep -q "^$v" \
+      && echo "   ✅ repo variable $v" || { echo "   ❌ repo variable $v 沒設定"; FAIL=1; }
+  done
+fi
+[ "$FAIL" = "0" ] || { echo; echo "❌ 設定不完整，上面有標記。修好再跑一次（這支腳本可以重複執行）。" >&2; exit 1; }
 
 echo
 echo "────────────────────────────────────────────"

@@ -37,7 +37,7 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 
 # 金鑰從本機 .env 讀，不寫進 repo 也不印出來。
 ENV_FILE="$ROOT/backend/.env"
-[ -f "$ENV_FILE" ] || { echo "❌ 找不到 $ENV_FILE（參考 backend/.env.example）" >&2; exit 1; }
+[ -f "$ENV_FILE" ] || { echo "❌ 找不到 ${ENV_FILE}（參考 backend/.env.example）" >&2; exit 1; }
 # shellcheck disable=SC1090
 TDX_CLIENT_ID="$(grep -E '^TDX_CLIENT_ID=' "$ENV_FILE" | cut -d= -f2-)"
 TDX_CLIENT_SECRET="$(grep -E '^TDX_CLIENT_SECRET=' "$ENV_FILE" | cut -d= -f2-)"
