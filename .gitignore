@@ -1,0 +1,35 @@
+# OS / editor
+.DS_Store
+*.log
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+.firebase/
+firebase-debug.log
+
+# Python / backend
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Java / backend
+target/
+.gradle/
+
+# On-device model files (GB-sized, never commit)
+*.gguf
+*.litertlm
+*.task
+*.onnx
