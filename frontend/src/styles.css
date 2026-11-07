@@ -193,6 +193,25 @@
   color-scheme: dark;
 }
 
+/* --- Access modes ---------------------------------------------------------
+   Set as data-mode on <html> by stores/profile.ts, so every screen follows
+   from one attribute and no component needs to know modes exist.
+
+   "large" raises the base size and darkens the greys. "voice" keeps the same
+   larger type: the person may not be reading it, but a sighted helper often
+   is, and someone who picks voice-first frequently has some usable vision.
+   Everything stays in rem, so the user's own text-size setting still
+   multiplies on top of this. */
+:root[data-mode='large'],
+:root[data-mode='voice'] {
+  font-size: 137.5%;
+  --ink: var(--tp-grayscale-900);      /* 17.3:1 on paper */
+  --ink-2: var(--tp-grayscale-800);    /* 11.9:1 */
+  --ink-soft: var(--tp-grayscale-700); /*  8.0:1, up from 5.4:1 */
+  --line: var(--tp-grayscale-500);
+  --divider: var(--tp-grayscale-300);
+}
+
 *,
 *::before,
 *::after {
