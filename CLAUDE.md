@@ -205,8 +205,19 @@ TTS 用 `flutter_tts`（MIT）＋系統內建引擎，iOS 設 playback category 
 - 色票：Primary 500 `#5AB4C5`、Secondary 500 `#F5BA4B`、Grayscale 500 `#738995`（各有 50–950 色階，見 `tp_colors.dart`）
 - 字體：中文 PingFang TC，英數 Roboto
 - 字級：h1 36／h2 24／title 18／h3 16／body 14／caption 12
-- Figma：Town Pass UI Kit（tpe-guideline.web.app 首頁有連結）；Figma Community 版本：
-  https://www.figma.com/community/file/1409212309969674409 （要先 duplicate 成自己的檔案才有 `/design/` 網址可讀）
+- Figma：官方 kit 已 duplicate 成可讀的檔案（Figma MCP 讀得到，community 連結本身沒有編輯權限）：
+  `https://www.figma.com/design/BMUosXZVZUMeLgPzeedzLZ/` — fileKey `BMUosXZVZUMeLgPzeedzLZ`
+  頁面 `1:2 📱Foundation & UI kit`；常用 frame：`3:15` Typography、`3:141` Main colors、
+  `3:390` Semantic colors、`3:4828` button、`3:5024` card、`3:5071` top navigation、`3:4717` list item。
+  用 `get_variable_defs` 取變數前先 `create_session`。
+- kit 的語意色（2026/11/07 從 Figma 變數實際讀出）：`background-color/light` #ffffff、
+  `background-color/dark` #f1f3f4、`disable-color` #e3e7e9、`text-color/primary` #30383d、
+  `text-color/second` #475259、`text-color/derection` #91a0a8、`alarm-color/default` #d45251、
+  **`reminder-color/default` #fd853a**（橘，提醒用，跟 alarm 的紅要分清楚）。
+- kit 的字級含行高：H1 36/48、H2 24/32、H3 16/22、Body 14/20、Caption 12/18，regular 400／semibold 600。
+  **前端刻意用更大的字和更鬆的行高**（base 112.5%、body 行高 1.5），因為使用者是低視能者，
+  WCAG 1.4.12 也要求 body 行高 ≥1.5。色彩角色跟 kit，字級不跟 —— 不要「照 kit 修正」回去。
+- kit 的字體變數寫 `PingFang SC`，但本服務用 **TC**（繁體服務，見本節字體規定），那是設計師字型選單的結果不是指示。
 - **前端的色票已經接好了**：`frontend/src/styles.css` 是兩層 token——
   第一層 `--tp-*` 是從 `app/lib/util/tp_colors.dart` 照抄的官方色階，第二層是語意角色
   （`--ink`、`--teal`、`--danger`…）。元件只用語意角色，**不要在元件裡寫死色碼**，

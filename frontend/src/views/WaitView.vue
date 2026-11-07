@@ -119,9 +119,12 @@ onBeforeUnmount(() => unwatch?.());
 
 <style scoped>
 .warn {
-  background: var(--danger-tint);
-  color: var(--danger);
-  border: 2px solid var(--danger-fill);
+  /* reminder, not alarm: another bus pulling in is a notice and nothing has
+     gone wrong yet. Red is kept for the wrong-bus case, so the two read
+     differently to someone who can make out colour at all. */
+  background: var(--reminder-tint);
+  color: var(--reminder);
+  border: 2px solid var(--reminder-fill);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   font-size: 1.1rem;
