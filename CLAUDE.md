@@ -21,8 +21,8 @@
 | **拿不到** | 降低「取得」門檻 | 經濟弱勢、沒有設備／網路的人：數位設備補助、取得管道 |
 
 **本隊抽到的子題：用不了（數位輔助設計，降低「操作」門檻）**
-**作品一句話：`TODO`**
-**主要使用者與情境：`TODO`**
+**作品一句話：視障者公車搭乘助手 — 不用看站牌、不用看車頭，也能自己搭對公車、在對的站下車。（之後延伸到捷運轉乘與步行）**
+**主要使用者與情境：全盲／低視能、會用 VoiceOver／TalkBack 的人，戴耳機出門搭公車。完整規格、功能優先順序與 Demo 計畫見 `docs/product-spec.md`，開發前先讀。**
 
 功能取捨一律以「這個子題的使用者真的會用到嗎」為準。完成比完美重要。
 
@@ -79,7 +79,7 @@
 1. 臺北市資料大平臺 https://data.taipei （優先使用）
 2. 政府資料開放平臺 https://data.gov.tw
 3. TDX 運輸資料流通服務 https://tdx.transportdata.tw （需註冊取得金鑰）
-4. 臺北城市儀表板 https://dashboard.gov.taipei （開源：github.com/tpe-doit/Taipei-City-Dashboard）
+4. 臺北城市儀表板 https://citydashboard.taipei （開源：github.com/tpe-doit/Taipei-City-Dashboard；工作坊簡報寫的 dashboard.gov.taipei 連不到）
 
 - **核心資料**必須是上面來源的合法開放資料，並註明出處。
 - **非核心資料**可以用模擬資料，但要在 README 標明是模擬的。
@@ -233,6 +233,9 @@ window.flutterObject.addEventListener('message', onReply);
 - 新增依賴前確認授權，並同步更新 README 表格。
 - 動到 `app/` 的 Dart 檔後，確認 `flutter analyze` 沒有新錯誤；有新增 SVG 或 model 時記得重跑 build_runner。
 - 不要 commit：金鑰、`.env`、模型檔（`*.gguf`、`*.litertlm`、`*.task`）、`build/`、`node_modules/`。
+
+## 已查到可用的資料集
+見 `docs/data-sources.md`（「用不了」子題相關，2026/11/07 查證）。
 
 ## 參考資源
 - TownPass 原始碼：https://github.com/taipei-doit/TownPass
