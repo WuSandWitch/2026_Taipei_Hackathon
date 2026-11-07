@@ -38,7 +38,8 @@
 
 ### 語音功能注意（灰色地帶，先確認）
 - 語音辨識（STT）也算模型推論，依第 3.2 節，**執行時必須在裝置端完成**。
-- **不要用網頁的 Web Speech API（`SpeechRecognition` / `webkitSpeechRecognition`）**：Chrome 會把音訊送到雲端辨識，Android WebView 通常也不支援。
+- **不要用網頁的 `SpeechRecognition` / `webkitSpeechRecognition`**：Chrome 會把音訊送到雲端辨識，Android WebView 通常也不支援。
+- **語音合成（TTS）不在此限**：`window.speechSynthesis` 走的是系統內建引擎。目前 `frontend/src/lib/announcer.ts` 只把它當桌面開發的 fallback；在 App 內會先 probe `tts_speak`，成功就一律走原生 handler（`flutter_tts` + 系統引擎，裝置端執行）。不要為了「合規」把它拆掉。
 - 做法：在 App 加自訂 Handler 呼叫原生裝置端辨識。可用 pub 套件 `speech_to_text`（iOS 要設定 on-device recognition；Android 要指定偏好離線辨識），或 whisper.cpp 類的 Flutter 套件跑本機模型。採用前確認授權，並用飛航模式實測。
 - 語音朗讀（TTS）用系統內建引擎（例如 `flutter_tts`）走 App Handler，同樣要確認離線可用。
 - 系統內建 STT／TTS 算不算「AI 推論」的規範範圍，要找主辦或 Coding 診療室確認，並把結論寫回這裡。
@@ -69,7 +70,7 @@
 作品通常是「一個微服務網頁 + 視需要的後端」。App 本身可改可不改：要掛上我們的服務入口一定要改；要用到內建沒有的原生能力（例如語音、裝置端 AI）就要在 App 加自訂 Handler。
 
 - `frontend/` 技術棧：Vue 3 + Vite + TypeScript（npm）。流程與 API 約定見 `frontend/README.md`
-- `backend/` 技術棧：`TODO`（語言不限，但要有 Dockerfile）
+- `backend/` 技術棧：Python 3.12 + FastAPI（uvicorn），代理 TDX 公車 API。端點、欄位與快取策略見 `backend/README.md`
 
 ---
 
@@ -182,6 +183,17 @@ window.flutterObject.addEventListener('message', onReply);
 內建 handler 的 `name`：`userinfo`、`location`、`deviceinfo`、`notify`、`qr_code_scan`、`launch_map`、`open_link`、`phone_call`、`1999agree`。
 **每個 handler 的 `data` 格式以 `app/lib/util/web_message_handler/tp_web_message_handler.dart` 的實作為準，用之前先讀原始碼，不要猜。**
 
+本作品自訂的 handler（`app/lib/util/web_message_handler/bus_assist_message_handler.dart`，**已實作，不要重做**）：
+
+| name | data | 回覆 |
+|---|---|---|
+| `tts_speak` | `{ text: string, probe?: boolean }` | `bool`；`probe: true` 只回報可用性、不發聲 |
+| `tts_stop` | `null` | 無 |
+| `vibrate` | `{ pattern: number[] }`（毫秒，震／停交替，上限 6 秒） | 無 |
+
+TTS 用 `flutter_tts`（MIT）＋系統內建引擎，iOS 設 playback category 讓靜音模式也出聲；
+震動用 Flutter 內建 `HapticFeedback`，不需額外套件或權限。
+
 前端必須遵守：
 - 一般瀏覽器沒有 `flutterObject`。**一律先判斷是否存在**，不存在時改用 mock 資料，這樣才能在桌面瀏覽器開發。把橋接包成一個模組（例如 `useTownPass()` / `bridge.ts`），不要在元件裡到處直接呼叫。
 - 以手機直式版面為主（用 Chrome DevTools 裝置模擬），完成後一定要在 App 內實測。
@@ -193,7 +205,14 @@ window.flutterObject.addEventListener('message', onReply);
 - 色票：Primary 500 `#5AB4C5`、Secondary 500 `#F5BA4B`、Grayscale 500 `#738995`（各有 50–950 色階，見 `tp_colors.dart`）
 - 字體：中文 PingFang TC，英數 Roboto
 - 字級：h1 36／h2 24／title 18／h3 16／body 14／caption 12
-- Figma：Town Pass UI Kit（tpe-guideline.web.app 首頁有連結）
+- Figma：Town Pass UI Kit（tpe-guideline.web.app 首頁有連結）；Figma Community 版本：
+  https://www.figma.com/community/file/1409212309969674409 （要先 duplicate 成自己的檔案才有 `/design/` 網址可讀）
+- **前端的色票已經接好了**：`frontend/src/styles.css` 是兩層 token——
+  第一層 `--tp-*` 是從 `app/lib/util/tp_colors.dart` 照抄的官方色階，第二層是語意角色
+  （`--ink`、`--teal`、`--danger`…）。元件只用語意角色，**不要在元件裡寫死色碼**，
+  也不要改第一層的值。要新色階就從 `tp_colors.dart` 補。
+- 注意品牌色不等於可讀色：Primary 500 在白底只有 2.39:1，所以文字和按鈕降到
+  Primary 700／800。改配色前先算對比度（本服務的使用者是視障者，這不是加分項）。
 
 ### 無障礙（本題的核心，不是加分項）
 - 觸控目標至少 48×48 dp；文字放大 200% 仍可閱讀、不破版
