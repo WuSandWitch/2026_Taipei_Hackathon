@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
  * Page heading that takes focus when shown, so screen readers announce the new
- * step right away. Also shows which of the four steps the rider is on.
+ * step right away. Also shows which of the four steps the rider is on, as text
+ * plus a four-segment progress bar in Town Pass primary.
  */
 import { nextTick, onMounted, ref, watch } from 'vue';
 
@@ -24,7 +25,12 @@ watch(() => props.focusKey, focusHeading);
 
 <template>
   <div class="heading">
-    <p v-if="step" class="heading__step">第 {{ step }} 步，共 4 步</p>
+    <template v-if="step">
+      <div class="heading__bar" aria-hidden="true">
+        <span v-for="n in 4" :key="n" :class="{ on: n <= step }" />
+      </div>
+      <p class="heading__step">第 {{ step }} 步，共 4 步</p>
+    </template>
     <h1 ref="el" tabindex="-1"><slot /></h1>
   </div>
 </template>
@@ -33,12 +39,29 @@ watch(() => props.focusKey, focusHeading);
 .heading {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+}
+
+.heading__bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 4px;
+  margin-bottom: 4px;
+}
+
+.heading__bar span {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--divider);
+}
+
+.heading__bar span.on {
+  background: var(--brand);
 }
 
 .heading__step {
-  color: var(--ink-soft);
-  font-size: 0.9rem;
+  color: var(--teal);
+  font-size: 0.85rem;
   font-weight: 600;
 }
 </style>

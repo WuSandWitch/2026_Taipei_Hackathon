@@ -64,15 +64,19 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
   <div class="page">
     <template v-if="phase === 'checking'">
       <StepHeading :step="3" focus-key="checking">正在確認你搭的車</StepHeading>
-      <div class="badge badge--wait" aria-hidden="true"><span class="spinner" /></div>
-      <p class="lede">比對你的位置和 {{ r.routeName }} 公車的即時位置，大約需要幾秒。</p>
+      <div class="card result">
+        <div class="badge badge--wait" aria-hidden="true"><span class="spinner" /></div>
+        <p class="lede">比對你的位置和 {{ r.routeName }} 公車的即時位置，大約需要幾秒。</p>
+      </div>
     </template>
 
     <template v-else-if="phase === 'ok'">
       <StepHeading :step="3" focus-key="ok">搭對了，你在 {{ r.routeName }} 上</StepHeading>
-      <div class="badge badge--ok" aria-hidden="true">✓</div>
-      <p class="big">往 {{ r.headsign }}<br />在 {{ trip.destination?.name }} 下車</p>
-      <p v-if="trip.plate" class="lede">車牌 <span class="num">{{ trip.plate }}</span></p>
+      <div class="card result">
+        <div class="badge badge--ok" aria-hidden="true">✓</div>
+        <p class="big">往 {{ r.headsign }}<br />在 {{ trip.destination?.name }} 下車</p>
+        <p v-if="trip.plate" class="lede">車牌 <span class="num">{{ trip.plate }}</span></p>
+      </div>
       <div class="page__actions">
         <BigButton @click="goRide">開始下車提醒</BigButton>
       </div>
@@ -80,9 +84,11 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
 
     <template v-else-if="phase === 'wrong'">
       <StepHeading :step="3" focus-key="wrong">這班可能不是 {{ r.routeName }}</StepHeading>
-      <div class="badge badge--bad" aria-hidden="true">!</div>
-      <p class="big">{{ trip.boardCheck?.reason ?? '你的位置和這路公車對不起來。' }}</p>
-      <p class="lede">建議在下一站下車，可以請司機或旁人協助。下車後我們會幫你重新等車。</p>
+      <div class="card result">
+        <div class="badge badge--bad" aria-hidden="true">!</div>
+        <p class="big">{{ trip.boardCheck?.reason ?? '你的位置和這路公車對不起來。' }}</p>
+        <p class="lede">建議在下一站下車，可以請司機或旁人協助。下車後我們會幫你重新等車。</p>
+      </div>
       <div class="page__actions">
         <BigButton variant="danger" @click="waitAgain">我下車了，重新等車</BigButton>
         <BigButton variant="secondary" @click="goRide">我確定搭對了</BigButton>
@@ -91,7 +97,10 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
 
     <template v-else>
       <StepHeading :step="3" focus-key="error">現在沒辦法確認</StepHeading>
-      <p class="lede">可能是網路或定位不穩。你也可以直接問司機：「這是 {{ r.routeName }} 嗎？」</p>
+      <div class="card result">
+        <div class="badge badge--warn" aria-hidden="true">?</div>
+        <p class="lede">可能是網路或定位不穩。你也可以直接問司機：「這是 {{ r.routeName }} 嗎？」</p>
+      </div>
       <div class="page__actions">
         <BigButton @click="check">再試一次</BigButton>
         <BigButton variant="secondary" @click="goRide">先開始下車提醒</BigButton>
@@ -101,40 +110,52 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
 </template>
 
 <style scoped>
+/* Town Pass "Pop up / type3": white card, round icon on top, centred text. */
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
 .badge {
-  width: 9rem;
-  height: 9rem;
+  width: 5.5rem;
+  height: 5.5rem;
   border-radius: 50%;
-  margin: 12px auto 0;
   display: grid;
   place-items: center;
-  font-size: 5rem;
-  font-weight: 900;
+  font-size: 3rem;
+  font-weight: 700;
   line-height: 1;
 }
 
 .badge--ok {
-  background: var(--ok-tint);
-  color: var(--ok);
-  border: 6px solid var(--ok);
+  background: var(--brand-fill);
+  color: var(--on-brand);
 }
 
 .badge--bad {
-  background: var(--danger-tint);
-  color: var(--danger);
-  border: 6px solid var(--danger);
+  background: var(--danger);
+  color: var(--paper);
+}
+
+/* Secondary 500 circle, like the kit's alert pop-up. Icon is decorative. */
+.badge--warn {
+  background: var(--tp-secondary-500);
+  color: var(--tp-grayscale-950);
 }
 
 .badge--wait {
-  background: var(--surface);
+  background: var(--teal-tint);
 }
 
 .spinner {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.6rem;
+  height: 2.6rem;
   border-radius: 50%;
-  border: 6px solid var(--line);
-  border-top-color: var(--teal);
+  border: 5px solid var(--divider);
+  border-top-color: var(--brand);
   animation: spin 1s linear infinite;
 }
 
@@ -145,9 +166,8 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
 }
 
 .big {
-  font-size: 1.4rem;
-  font-weight: 700;
-  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 600;
   line-height: 1.4;
 }
 </style>

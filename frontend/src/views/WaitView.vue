@@ -121,10 +121,10 @@ onBeforeUnmount(() => unwatch?.());
 .warn {
   background: var(--danger-tint);
   color: var(--danger);
-  border: 3px solid var(--danger);
+  border: 2px solid var(--danger-fill);
   border-radius: var(--radius-md);
   padding: 14px 16px;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 </style>
