@@ -39,8 +39,16 @@ echo "▸ 授權"
 # run.admin：部署 Cloud Run；serviceAccountUser：以執行身分啟動服務；
 # cloudbuild + artifactregistry + storage：--source 部署會用 Cloud Build 建 image；
 # firebasehosting.admin：部署前端。
+#
+# firebase.viewer 是後來補的：firebase-tools 在部署前會先打 serviceusage API 查
+# 「Hosting API 有沒有啟用」，少了 serviceusage.services.get 就會在那一步 403：
+#     Permission denied to get service [firebasehosting.googleapis.com]
+# firebasehosting.admin 不含這個權限。firebase.viewer 同時給 serviceusage.services.get
+# 和 firebase.projects.get（firebase-tools 也要讀專案資訊），所以一個角色就夠，
+# 不需要再加 serviceusage.serviceUsageViewer。
 for role in roles/run.admin roles/iam.serviceAccountUser roles/cloudbuild.builds.editor \
-            roles/artifactregistry.writer roles/storage.admin roles/firebasehosting.admin; do
+            roles/artifactregistry.writer roles/storage.admin roles/firebasehosting.admin \
+            roles/firebase.viewer; do
   gcloud projects add-iam-policy-binding "$PROJECT" \
     --member="serviceAccount:${SA}" --role="$role" --condition=None >/dev/null
   echo "   ✅ $role"
