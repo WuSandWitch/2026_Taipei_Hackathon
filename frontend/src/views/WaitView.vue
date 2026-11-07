@@ -13,6 +13,7 @@ import { repeatLast, say, Vibe } from '@/lib/announcer';
 import { notify } from '@/lib/bridge';
 import { source, type ArrivalUpdate } from '@/data';
 import { formatEta, trip, zhCount } from '@/stores/trip';
+import { s as t } from '@/i18n';
 
 const router = useRouter();
 const route = useRoute();
@@ -35,6 +36,11 @@ const status = computed(() => {
 });
 
 const others = computed(() => (a.value?.otherArriving ?? []).filter((n) => n !== r.value.routeName));
+
+// Only worth offering when a driver could actually see it. Before the bus is
+// close there is nobody to show it to, and a button with no target is the kind
+// of thing that makes people doubt the rest of the screen.
+const canFlagDown = computed(() => a.value?.status === 'arriving' || a.value?.status === 'at_stop');
 
 function once(key: string, fn: () => void) {
   if (fired.has(key)) return;
@@ -108,8 +114,8 @@ onBeforeUnmount(() => unwatch?.());
     <p v-else class="lede">在 {{ trip.destination?.name }} 下車。車快到、車到站時，會用語音和震動提醒你。</p>
 
     <div class="page__actions">
+      <BigButton v-if="canFlagDown" @click="showDriverCard = true">{{ t.showDriver }}</BigButton>
       <BigButton :variant="a?.status === 'at_stop' ? 'primary' : 'secondary'" @click="boarded">我上車了</BigButton>
-      <BigButton variant="secondary" @click="showDriverCard = true">給司機看：我要搭這班</BigButton>
       <BigButton variant="quiet" @click="repeatLast">再說一次</BigButton>
     </div>
   </div>

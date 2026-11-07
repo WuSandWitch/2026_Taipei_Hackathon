@@ -26,11 +26,14 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to) => {
-  // Someone arriving with their language and mode already settled — a returning
-  // user, or one who came in through a Town Pass card carrying ?profile= —
-  // should not be asked again. See stores/profile.ts for the precedence rules.
-  if (to.name === 'language' && profile.chosen) {
+router.beforeEach((to, from) => {
+  // Skip the setup steps only on the way in — a returning user, or someone
+  // entering through a Town Pass card carrying ?profile=. Once the app is
+  // running, tapping "語言與字體" has to actually open them: redirecting a
+  // deliberate navigation makes the control look broken.
+  // from.matched is empty only on the very first navigation.
+  const firstLoad = from.matched.length === 0;
+  if (to.name === 'language' && profile.chosen && firstLoad) {
     return { name: 'plan', query: to.query };
   }
   // A reload mid-trip loses in-memory state; start over instead of showing an

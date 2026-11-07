@@ -32,6 +32,13 @@ export interface Strings {
   start: string;
   changeLang: string;
 
+  /** Flagging the bus down. The card's driver-facing text is deliberately NOT
+   *  in here: it is always Chinese, because the person reading it is a Taipei
+   *  bus driver. Only the rider-facing instruction is translated. */
+  showDriver: string;
+  driverHint: string;
+  close: string;
+
   /** Chrome that stays visible during a trip. */
   voiceToggle: string;
   endTrip: string;
