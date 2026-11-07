@@ -1,28 +1,89 @@
 /*
- * Design tokens.
- * Base type is larger than TownPass defaults (body 14px) on purpose:
- * this service is for blind and low-vision riders. 1rem = 20px at default zoom
- * and scales with the user's text size setting.
- * The one bold element is the LED route sign (black + amber, like Taipei bus head signs).
+ * Design tokens — Town Pass (城市通) design system.
+ *
+ * Layer 1 (--tp-*) is the official palette, copied verbatim from
+ * `app/lib/util/tp_colors.dart` / `tp_text_styles.dart`, which is the same
+ * system as the Town Pass Open Source Gov Mobile App UI Kit on Figma Community.
+ * Do not invent values here: add the missing step from tp_colors.dart instead.
+ *
+ * Layer 2 is the semantic role each screen actually uses. The roles exist
+ * because the brand step is not always the readable step: Primary 500
+ * (#5AB4C5) is only 2.39:1 on white, so it is used for brand surfaces while
+ * text and controls drop to Primary 700 (5.89:1) or 800 (10.1:1). This service
+ * is for blind and low-vision riders, so every role below is >= 4.5:1 against
+ * its own background and was measured, not eyeballed.
+ *
+ * Base type is deliberately larger than Town Pass defaults (body 14px):
+ * 1rem = 20px here, and it still scales with the user's text-size setting.
+ * The LED route sign keeps its own black + amber tokens because it imitates a
+ * real Taipei bus head sign.
  */
 :root {
-  --paper: #ffffff;
-  --surface: #f1f3f4;
-  --ink: #0f2a30;
-  --ink-soft: #40555b;
-  --line: #adb8be;
-  --teal: #1f5560;
-  --teal-press: #163f47;
-  --teal-tint: #e3f1f4;
-  --on-teal: #ffffff;
+  /* --- Layer 1: Town Pass palette (tp_colors.dart) --- */
+  --tp-primary-50: #edf8fa;
+  --tp-primary-100: #dbf1f5;
+  --tp-primary-200: #b4e2ea;
+  --tp-primary-300: #93d4df;
+  --tp-primary-400: #71c5d5;
+  --tp-primary-500: #5ab4c5;
+  --tp-primary-600: #468d9b;
+  --tp-primary-700: #356c77;
+  --tp-primary-800: #22474e;
+  --tp-primary-900: #112629;
+  --tp-primary-950: #081315;
+
+  --tp-secondary-50: #fdf8ed;
+  --tp-secondary-100: #fcf2df;
+  --tp-secondary-300: #f4d69e;
+  --tp-secondary-500: #f5ba4b;
+  --tp-secondary-700: #ad7b2b;
+
+  --tp-grayscale-50: #f1f3f4;
+  --tp-grayscale-100: #e3e7e9;
+  --tp-grayscale-200: #cad1d5;
+  --tp-grayscale-300: #adb8be;
+  --tp-grayscale-400: #91a0a8;
+  --tp-grayscale-500: #738995;
+  --tp-grayscale-600: #5e6d76;
+  --tp-grayscale-700: #475259;
+  --tp-grayscale-800: #30383d;
+  --tp-grayscale-900: #171b1d;
+  --tp-grayscale-950: #0b0d0e;
+
+  --tp-red-50: #faeeee;
+  --tp-red-200: #ebb6b6;
+  --tp-red-300: #e29494;
+  --tp-red-500: #d45251;
+  --tp-red-600: #c2332f;
+  --tp-red-700: #912522;
+  --tp-red-900: #310b0b;
+
+  --tp-white: #ffffff;
+
+  /* --- Layer 2: semantic roles (light) --- */
+  --paper: var(--tp-white);
+  --surface: var(--tp-grayscale-50);
+  --ink: var(--tp-grayscale-900);        /* 17.3:1 on paper */
+  --ink-soft: var(--tp-grayscale-600);   /*  5.4:1 on paper */
+  --line: var(--tp-grayscale-300);
+  --teal: var(--tp-primary-700);         /*  5.9:1 — brand, readable */
+  --teal-press: var(--tp-primary-800);
+  --teal-tint: var(--tp-primary-50);
+  --on-teal: var(--tp-white);
+  --ok: var(--tp-primary-700);           /* the palette has no green; success is brand teal */
+  --ok-tint: var(--tp-primary-50);
+  --danger: var(--tp-red-600);           /*  5.5:1 on paper */
+  --danger-tint: var(--tp-red-50);
+
+  /* The route sign imitates a bus head sign; not part of the palette. */
   --led-bg: #000000;
   --led: #ffb000;
   --led-soft: #ffd27a;
-  --ok: #17663a;
-  --ok-tint: #e3f3e8;
-  --danger: #a3241c;
-  --danger-tint: #fbe9e7;
-  --focus: #f5ba4b;
+
+  /* Focus is two-tone: Secondary 500 alone is 1.75:1 on white and would be an
+     unreliable focus indicator, so a dark ring carries the contrast. */
+  --focus: var(--tp-grayscale-900);
+  --focus-halo: var(--tp-secondary-500);
 
   --radius-lg: 22px;
   --radius-md: 14px;
@@ -31,39 +92,44 @@
   color-scheme: light;
 }
 
+/* --- Layer 2: semantic roles (dark) --- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #0c1214;
-    --surface: #182226;
-    --ink: #f1f5f6;
-    --ink-soft: #b9c6ca;
-    --line: #4b5b61;
-    --teal: #8fd3e0;
-    --teal-press: #b4e2ea;
-    --teal-tint: #15333a;
-    --on-teal: #06181c;
-    --ok: #7ad69c;
-    --ok-tint: #10301d;
-    --danger: #ff9b90;
-    --danger-tint: #3a1512;
+    --paper: var(--tp-grayscale-950);
+    --surface: var(--tp-grayscale-900);
+    --ink: var(--tp-grayscale-50);        /* 15.7:1 on paper */
+    --ink-soft: var(--tp-grayscale-300);  /*  9.6:1 on paper */
+    --line: var(--tp-grayscale-700);
+    --teal: var(--tp-primary-300);        /* 11.8:1 on paper */
+    --teal-press: var(--tp-primary-200);
+    --teal-tint: var(--tp-primary-900);
+    --on-teal: var(--tp-grayscale-950);
+    --ok: var(--tp-primary-300);
+    --ok-tint: var(--tp-primary-900);
+    --danger: var(--tp-red-300);          /*  8.3:1 on paper */
+    --danger-tint: var(--tp-red-900);
+    --focus: var(--tp-secondary-500);
+    --focus-halo: var(--tp-grayscale-950);
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --paper: #0c1214;
-  --surface: #182226;
-  --ink: #f1f5f6;
-  --ink-soft: #b9c6ca;
-  --line: #4b5b61;
-  --teal: #8fd3e0;
-  --teal-press: #b4e2ea;
-  --teal-tint: #15333a;
-  --on-teal: #06181c;
-  --ok: #7ad69c;
-  --ok-tint: #10301d;
-  --danger: #ff9b90;
-  --danger-tint: #3a1512;
+  --paper: var(--tp-grayscale-950);
+  --surface: var(--tp-grayscale-900);
+  --ink: var(--tp-grayscale-50);
+  --ink-soft: var(--tp-grayscale-300);
+  --line: var(--tp-grayscale-700);
+  --teal: var(--tp-primary-300);
+  --teal-press: var(--tp-primary-200);
+  --teal-tint: var(--tp-primary-900);
+  --on-teal: var(--tp-grayscale-950);
+  --ok: var(--tp-primary-300);
+  --ok-tint: var(--tp-primary-900);
+  --danger: var(--tp-red-300);
+  --danger-tint: var(--tp-red-900);
+  --focus: var(--tp-secondary-500);
+  --focus-halo: var(--tp-grayscale-950);
   color-scheme: dark;
 }
 
@@ -113,9 +179,11 @@ button {
   color: inherit;
 }
 
+/* Two-tone ring so the indicator survives both themes and any background. */
 :focus-visible {
-  outline: 4px solid var(--focus);
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
+  box-shadow: 0 0 0 7px var(--focus-halo);
 }
 
 h1:focus,
