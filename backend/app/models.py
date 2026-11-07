@@ -12,6 +12,11 @@ ArrivalStatus = Literal["coming", "arriving", "at_stop", "departed", "no_service
 class BusStop(BaseModel):
     id: str
     name: str
+    # Romanised name, for speech only. The screen keeps the Chinese name so it
+    # matches the physical stop sign; a vi/th/fil speech engine cannot
+    # pronounce Chinese characters, so spoken announcements use this instead.
+    # Empty when TDX has none.
+    nameEn: str = ""
     lat: float
     lng: float
 
@@ -21,12 +26,14 @@ class RouteOption(BaseModel):
     routeName: str
     direction: Literal[0, 1]
     headsign: str
+    headsignEn: str = ""
     etaSec: int | None = None
 
 
 class RouteStop(BaseModel):
     stopId: str
     name: str
+    nameEn: str = ""
     seq: int
 
 

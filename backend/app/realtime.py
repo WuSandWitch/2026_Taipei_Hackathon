@@ -99,7 +99,13 @@ async def _a1_city() -> list[dict]:
 # --- step 1: pick a stop and a route -------------------------------------
 async def nearest_stop(lat: float, lng: float) -> BusStop:
     station = await catalog.nearest_station(lat, lng)
-    return BusStop(id=station.uid, name=station.name, lat=station.lat, lng=station.lng)
+    return BusStop(
+        id=station.uid,
+        name=station.name,
+        nameEn=await catalog.stop_name_en(station.stop_uids),
+        lat=station.lat,
+        lng=station.lng,
+    )
 
 
 async def routes_at_station(station: catalog.Station) -> list[RouteOption]:
@@ -143,6 +149,7 @@ async def routes_at_station(station: catalog.Station) -> list[RouteOption]:
                 routeName=info.name,
                 direction=direction,  # type: ignore[arg-type]
                 headsign=await catalog.headsign(uid, direction),
+                headsignEn=await catalog.headsign_en(uid, direction),
                 etaSec=eta,
             )
         )
@@ -170,7 +177,10 @@ async def stops_after(route_uid: str, direction: int, from_station: catalog.Stat
     start = next((i for i, s in enumerate(stops) if s["stopUid"] in here), None)
     if start is None:
         return []
-    return [RouteStop(stopId=s["stopUid"], name=s["name"], seq=s["seq"]) for s in stops[start + 1 :]]
+    return [
+        RouteStop(stopId=s["stopUid"], name=s["name"], nameEn=s.get("nameEn", ""), seq=s["seq"])
+        for s in stops[start + 1 :]
+    ]
 
 
 # --- step 2: waiting at the stop -----------------------------------------
