@@ -35,6 +35,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 未設定時 google-github-actions/auth 會抱怨「secret 沒注入 / fork 不傳 secret」，
+      # 那個訊息跟真正的原因無關，很難循線找到問題。先自己檢查並講清楚要跑什麼。
+      - name: Check the one-time setup has been done
+        run: |
+          missing=()
+          [ -n "${{ vars.GCP_PROJECT_ID }}" ]   || missing+=(GCP_PROJECT_ID)
+          [ -n "${{ vars.GCP_WIF_PROVIDER }}" ] || missing+=(GCP_WIF_PROVIDER)
+          [ -n "${{ vars.GCP_DEPLOY_SA }}" ]    || missing+=(GCP_DEPLOY_SA)
+          if [ ${#missing[@]} -gt 0 ]; then
+            {
+              echo "### 部署尚未設定"
+              echo ""
+              echo "缺少這些 repo variable：\`${missing[*]}\`"
+              echo ""
+              echo "在本機跑一次就好（會修改 GCP IAM，需要專案擁有者權限）："
+              echo ""
+              echo '```bash'
+              echo './scripts/setup-cicd.sh'
+              echo '```'
+              echo ""
+              echo "它會建立 service account、設定 Workload Identity Federation，"
+              echo "並寫入這三個 variable。細節見 README 的 CI/CD 章節。"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::缺少 repo variable: ${missing[*]} — 請先在本機執行 ./scripts/setup-cicd.sh（詳見本次 run 的 Summary）"
+            exit 1
+          fi
+          echo "設定完整，繼續部署。"
+
       - uses: google-github-actions/auth@v2
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
