@@ -10,7 +10,7 @@ import LedSign from '@/components/LedSign.vue';
 import StepHeading from '@/components/StepHeading.vue';
 import { repeatLast, say, Vibe } from '@/lib/announcer';
 import { notify } from '@/lib/bridge';
-import { s as L, spoken, t } from '@/i18n';
+import { placeAlt, placeName, s as L, spoken, t } from '@/i18n';
 import { source, type RidePosition } from '@/data';
 import { boardingSeq, nextStop, stopsLeft, trip, zhCount } from '@/stores/trip';
 
@@ -93,13 +93,13 @@ onBeforeUnmount(() => unwatch?.());
 
 <template>
   <div class="page">
-    <StepHeading :step="4">{{ t('rideTitle', { stop: dest.name }) }}</StepHeading>
+    <StepHeading :step="4">{{ t('rideTitle', { stop: placeName(dest.name, dest.nameEn) }) }}</StepHeading>
 
     <LedSign
       :route="r.routeName"
-      :headsign="r.headsign"
-      :status="nextStop ? t('nextStopIs', { stop: nextStop.name }) : dest.name"
-      :detail="left > 0 ? t('rideLeft', { n: left, stop: dest.name }) : L.rideArrived"
+      :headsign="placeName(r.headsign, r.headsignEn)"
+      :status="nextStop ? t('nextStopIs', { stop: placeName(nextStop.name, nextStop.nameEn) }) : placeName(dest.name, dest.nameEn)"
+      :detail="left > 0 ? t('rideLeft', { n: left, stop: placeName(dest.name, dest.nameEn) }) : L.rideArrived"
     />
 
     <p v-if="getOffNext" class="bell" role="note">{{ L.bellNow }}</p>
@@ -112,7 +112,10 @@ onBeforeUnmount(() => unwatch?.());
         :aria-current="s.seq === nextStop?.seq ? 'step' : undefined"
       >
         <span class="strip__dot" aria-hidden="true" />
-        <span class="strip__name">{{ s.name }}</span>
+        <span class="strip__name">
+          {{ placeName(s.name, s.nameEn) }}
+          <span v-if="placeAlt(s.name, s.nameEn)" class="alt">{{ placeAlt(s.name, s.nameEn) }}</span>
+        </span>
         <span v-if="s.seq === dest.seq" class="strip__tag">{{ L.tagGetOff }}</span>
         <span v-else-if="s.seq === nextStop?.seq" class="strip__tag strip__tag--next">{{ L.tagNext }}</span>
       </li>

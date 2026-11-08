@@ -4,11 +4,11 @@ import BigButton from '@/components/BigButton.vue';
 import StepHeading from '@/components/StepHeading.vue';
 import { repeatLast } from '@/lib/announcer';
 import { resetTrip, trip } from '@/stores/trip';
-import { s as L, t } from '@/i18n';
+import { placeName, s as L, t } from '@/i18n';
 
 const router = useRouter();
 const route = useRoute();
-const destName = trip.destination?.name ?? '';
+const destName = placeName(trip.destination?.name ?? '', trip.destination?.nameEn);
 
 function done() {
   resetTrip();

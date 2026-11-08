@@ -11,7 +11,7 @@ import { say, Vibe } from '@/lib/announcer';
 import { getLocation } from '@/lib/bridge';
 import { source } from '@/data';
 import { trip } from '@/stores/trip';
-import { locale, s as L, spoken, t } from '@/i18n';
+import { locale, placeName, s as L, spoken, t } from '@/i18n';
 
 type Phase = 'checking' | 'ok' | 'wrong' | 'unknown' | 'error';
 
@@ -93,7 +93,7 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
       <StepHeading :step="3" focus-key="ok">{{ t('okTitle', { route: r.routeName }) }}</StepHeading>
       <div class="card result">
         <div class="badge badge--ok" aria-hidden="true">✓</div>
-        <p class="big">{{ t('okBody', { place: r.headsign, stop: trip.destination?.name ?? '' }) }}</p>
+        <p class="big">{{ t('okBody', { place: placeName(r.headsign, r.headsignEn), stop: placeName(trip.destination?.name ?? '', trip.destination?.nameEn) }) }}</p>
         <p v-if="trip.plate" class="lede">{{ t('plateIs', { plate: trip.plate }) }}</p>
       </div>
       <div class="page__actions">

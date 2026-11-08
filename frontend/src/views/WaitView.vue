@@ -13,7 +13,7 @@ import { repeatLast, say, Vibe } from '@/lib/announcer';
 import { notify } from '@/lib/bridge';
 import { source, type ArrivalUpdate } from '@/data';
 import { formatEta, trip, zhCount } from '@/stores/trip';
-import { s as L, t } from '@/i18n';
+import { placeName, s as L, t } from '@/i18n';
 
 const router = useRouter();
 const route = useRoute();
@@ -37,10 +37,14 @@ const status = computed(() => {
 
 const others = computed(() => (a.value?.otherArriving ?? []).filter((n) => n !== r.value.routeName));
 
-// Only worth offering when a driver could actually see it. Before the bus is
-// close there is nobody to show it to, and a button with no target is the kind
-// of thing that makes people doubt the rest of the screen.
-const canFlagDown = computed(() => a.value?.status === 'arriving' || a.value?.status === 'at_stop');
+// The card is always available, and becomes the primary action once a driver
+// could actually see it. Hiding it until then was a mistake: a control nobody
+// can find is the same as one that does not exist, and someone who wants to
+// rehearse before the bus arrives — or flag down a bus the service has not
+// noticed yet — has every reason to open it early.
+const flagDownIsNext = computed(
+  () => a.value?.status === 'arriving' || a.value?.status === 'at_stop'
+);
 
 function once(key: string, fn: () => void) {
   if (fired.has(key)) return;
@@ -103,7 +107,7 @@ onBeforeUnmount(() => unwatch?.());
 
     <LedSign
       :route="r.routeName"
-      :headsign="r.headsign"
+      :headsign="placeName(r.headsign, r.headsignEn)"
       :status="status"
       :detail="trip.plate ? t('plateIs', { plate: trip.plate }) : undefined"
     />
@@ -111,10 +115,12 @@ onBeforeUnmount(() => unwatch?.());
     <p v-if="others.length" class="warn" role="note">
       {{ t('notYourBus', { others: others.join('、') }) }}
     </p>
-    <p v-else class="lede">{{ t('waitBody', { stop: trip.destination?.name ?? '' }) }}</p>
+    <p v-else class="lede">{{ t('waitBody', { stop: placeName(trip.destination?.name ?? '', trip.destination?.nameEn) }) }}</p>
 
     <div class="page__actions">
-      <BigButton v-if="canFlagDown" @click="showDriverCard = true">{{ L.showDriver }}</BigButton>
+      <BigButton :variant="flagDownIsNext ? 'primary' : 'secondary'" @click="showDriverCard = true">
+        {{ L.showDriver }}
+      </BigButton>
       <BigButton :variant="a?.status === 'at_stop' ? 'primary' : 'secondary'" @click="boarded">
         {{ L.iBoarded }}
       </BigButton>

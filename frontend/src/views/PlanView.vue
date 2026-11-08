@@ -12,7 +12,7 @@ import { getLocation } from '@/lib/bridge';
 import { say } from '@/lib/announcer';
 import { source, type RouteOption, type RouteStop } from '@/data';
 import { formatEta, resetTrip, trip, zhCount } from '@/stores/trip';
-import { s as L, spoken, t } from '@/i18n';
+import { placeAlt, placeName, s as L, spoken, t } from '@/i18n';
 
 type Phase = 'locating' | 'error' | 'route' | 'dest' | 'confirm';
 
@@ -77,11 +77,11 @@ function start() {
 }
 
 function routeLabel(r: RouteOption) {
-  return t('routeAria', { route: r.routeName, place: r.headsign, eta: formatEta(r.etaSec) });
+  return t('routeAria', { route: r.routeName, place: placeName(r.headsign, r.headsignEn), eta: formatEta(r.etaSec) });
 }
 
 function destLabel(s: RouteStop, i: number) {
-  return t('destAria', { stop: s.name, n: i + 1 });
+  return t('destAria', { stop: placeName(s.name, s.nameEn), n: i + 1 });
 }
 
 onMounted(locate);
@@ -108,14 +108,18 @@ onMounted(locate);
     <template v-else-if="phase === 'route'">
       <StepHeading :step="1" focus-key="route">{{ L.pickRouteTitle }}</StepHeading>
       <p class="section-title">
-        {{ L.youAreAt }} <strong class="here">{{ trip.stop?.name }}</strong>
+        {{ L.youAreAt }}
+        <strong class="here">{{ placeName(trip.stop?.name ?? '', trip.stop?.nameEn) }}</strong>
+        <span v-if="placeAlt(trip.stop?.name ?? '', trip.stop?.nameEn)" class="alt">
+          {{ placeAlt(trip.stop?.name ?? '', trip.stop?.nameEn) }}
+        </span>
       </p>
       <ul class="section list" :aria-label="L.routeListLabel">
         <li v-for="r in routes" :key="r.routeId + r.direction">
           <button type="button" class="row" :aria-label="routeLabel(r)" @click="pickRoute(r)">
             <span class="chip num" aria-hidden="true">{{ r.routeName }}</span>
             <span class="row__text" aria-hidden="true">
-              <span class="row__main">{{ t('toward', { place: r.headsign }) }}</span>
+              <span class="row__main">{{ t('toward', { place: placeName(r.headsign, r.headsignEn) }) }}</span>
               <span class="row__sub" :class="{ 'row__sub--soon': (r.etaSec ?? 999) <= 180 }">{{ formatEta(r.etaSec) }}</span>
             </span>
             <span class="chevron" aria-hidden="true" />
@@ -131,13 +135,16 @@ onMounted(locate);
     <template v-else-if="phase === 'dest'">
       <StepHeading :step="1" focus-key="dest">{{ L.pickDestTitle }}</StepHeading>
       <p class="section-title">
-        {{ t('takingRoute', { route: trip.route?.routeName ?? '', place: trip.route?.headsign ?? '' }) }}
+        {{ t('takingRoute', { route: trip.route?.routeName ?? '', place: placeName(trip.route?.headsign ?? '', trip.route?.headsignEn) }) }}
       </p>
       <ol class="section list" :aria-label="L.destListLabel">
         <li v-for="(s, i) in trip.stopsAhead" :key="s.stopId">
           <button type="button" class="row row--stop" :aria-label="destLabel(s, i)" @click="pickDest(s)">
             <span class="row__count num" aria-hidden="true">{{ i + 1 }}</span>
-            <span class="row__main" aria-hidden="true">{{ s.name }}</span>
+            <span class="row__main" aria-hidden="true">
+              {{ placeName(s.name, s.nameEn) }}
+              <span v-if="placeAlt(s.name, s.nameEn)" class="alt">{{ placeAlt(s.name, s.nameEn) }}</span>
+            </span>
             <span class="chevron" aria-hidden="true" />
           </button>
         </li>
@@ -152,14 +159,14 @@ onMounted(locate);
       <StepHeading :step="1" focus-key="confirm">{{ L.confirmTitle }}</StepHeading>
       <LedSign
         :route="trip.route.routeName"
-        :headsign="trip.route.headsign"
-        :status="t('getOffAt', { stop: trip.destination.name })"
+        :headsign="placeName(trip.route.headsign, trip.route.headsignEn)"
+        :status="t('getOffAt', { stop: placeName(trip.destination.name, trip.destination.nameEn) })"
         :detail="t('totalStops', { n: stopsToGo, eta: formatEta(trip.route.etaSec) })"
       />
       <p class="lede">{{ L.confirmBody }}</p>
       <div class="page__actions">
         <p class="page__hint" aria-hidden="true">
-          {{ t('confirmHint', { n: stopsToGo, stop: trip.destination.name }) }}
+          {{ t('confirmHint', { n: stopsToGo, stop: placeName(trip.destination.name, trip.destination.nameEn) }) }}
         </p>
         <BigButton @click="start">{{ L.startTrip }}</BigButton>
         <BigButton variant="secondary" @click="backToDest">{{ L.backToDest }}</BigButton>
