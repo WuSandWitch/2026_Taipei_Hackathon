@@ -4,6 +4,7 @@ import BigButton from '@/components/BigButton.vue';
 import StepHeading from '@/components/StepHeading.vue';
 import { repeatLast } from '@/lib/announcer';
 import { resetTrip, trip } from '@/stores/trip';
+import { s as L, t } from '@/i18n';
 
 const router = useRouter();
 const route = useRoute();
@@ -17,14 +18,14 @@ function done() {
 
 <template>
   <div class="page">
-    <StepHeading>{{ destName }} 到了，請下車</StepHeading>
+    <StepHeading>{{ t('arriveTitle', { stop: destName }) }}</StepHeading>
     <div class="card result">
       <div class="badge" aria-hidden="true">✓</div>
-      <p class="lede">下車時請小心腳步。需要協助可以請司機或旁人幫忙。</p>
+      <p class="lede">{{ L.arriveBody }}</p>
     </div>
     <div class="page__actions">
-      <BigButton @click="done">完成</BigButton>
-      <BigButton variant="quiet" @click="repeatLast">再說一次</BigButton>
+      <BigButton @click="done">{{ L.done }}</BigButton>
+      <BigButton variant="quiet" @click="repeatLast">{{ L.sayAgain }}</BigButton>
     </div>
   </div>
 </template>
