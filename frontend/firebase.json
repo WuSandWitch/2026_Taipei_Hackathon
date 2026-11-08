@@ -1,7 +1,11 @@
 {
   "hosting": {
     "public": "dist",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "rewrites": [
       {
         "source": "**",
@@ -10,12 +14,24 @@
     ],
     "headers": [
       {
-        "source": "/assets/**",
-        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        "//": "Everything is no-cache by default. The entry document must never be cached: it names the hashed asset files, so a stale copy pins the app to an old build. The WebView inside Town Pass honours this and nothing else would make it let go — the previous rule used source '/index.html', which never matched a request for '/', so the page was being cached for an hour and deploys did not reach the phone.",
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       },
       {
-        "source": "/index.html",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+        "//": "Asset filenames contain a content hash, so a given URL can never change. Later rules win, so this overrides the blanket no-cache above.",
+        "source": "/assets/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
       }
     ]
   }
