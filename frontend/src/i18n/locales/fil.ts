@@ -124,6 +124,7 @@ export const fil: Strings = {
   whereNextStop: "Susunod na hintuan {next}. {n} hintuan pa papuntang {stop}.",
   stripLabel: "Mga susunod na hintuan",
   nextStopIs: "Susunod na hintuan {stop}",
+  busInfo: "Impormasyon ng bus",
   voiceToggle: 'Boses',
   endTrip: 'Tapusin ang paglalakbay',
   endTripArmed: 'Pindutin muli para tapusin',

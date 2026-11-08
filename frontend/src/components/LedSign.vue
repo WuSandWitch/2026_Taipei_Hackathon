@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { s as L, t } from '@/i18n';
 /**
  * The bus head-sign: route number in big amber digits on black.
  * Text stays real text so screen readers read it; the dot grid is decoration.
@@ -14,10 +15,10 @@ defineProps<{
 </script>
 
 <template>
-  <section class="led" aria-label="公車資訊">
+  <section class="led" :aria-label="L.busInfo">
     <div class="led__top">
       <p class="led__route num" :class="{ 'led__route--long': route.length > 3 }">{{ route }}</p>
-      <p v-if="headsign" class="led__headsign">往 {{ headsign }}</p>
+      <p v-if="headsign" class="led__headsign">{{ t('toward', { place: headsign }) }}</p>
     </div>
     <p v-if="status" class="led__status">{{ status }}</p>
     <p v-if="detail" class="led__detail">{{ detail }}</p>

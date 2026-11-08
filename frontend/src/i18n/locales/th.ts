@@ -124,6 +124,7 @@ export const th: Strings = {
   whereNextStop: "ป้ายถัดไป {next} อีก {n} ป้ายถึง {stop}",
   stripLabel: "ป้ายถัดไป",
   nextStopIs: "ป้ายถัดไป {stop}",
+  busInfo: "ข้อมูลรถเมล์",
   voiceToggle: 'เสียง',
   endTrip: 'จบการเดินทาง',
   endTripArmed: 'กดอีกครั้งเพื่อจบ',

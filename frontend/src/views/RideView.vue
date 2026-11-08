@@ -51,7 +51,7 @@ function onPos(p: RidePosition) {
   if (p.atStop && p.seq === d.seq) {
     once('arrived', () => {
       say(t('sayGetOffNow', { stop: spoken(d.name, d.nameEn) }), { urgent: true, vibe: Vibe.arrived });
-      notify(t('notifyArrivedDest', { stop: d.name }), L.value.tagGetOff);
+      notify(t('notifyArrivedDest', { stop: placeName(d.name, d.nameEn) }), L.value.tagGetOff);
       router.replace({ name: 'arrive', query: route.query });
     });
     return;
@@ -63,7 +63,7 @@ function onPos(p: RidePosition) {
     once(`leave-${p.seq}`, () => {
       if (n === 1) {
         say(t('sayNextIsDest', { stop: spoken(d.name, d.nameEn) }), { urgent: true, vibe: Vibe.getOffNext });
-        notify(L.value.notifyGetOffTitle, t('notifyGetOffBody', { stop: d.name }));
+        notify(L.value.notifyGetOffTitle, t('notifyGetOffBody', { stop: placeName(d.name, d.nameEn) }));
       } else if (n === 2) {
         say(t('sayTwoLeft', { stop: spoken(next?.name ?? '', next?.nameEn) }), { vibe: Vibe.tick });
       } else {

@@ -124,6 +124,7 @@ export const vi: Strings = {
   whereNextStop: "Trạm kế tiếp {next}. Còn {n} trạm đến {stop}.",
   stripLabel: "Các trạm phía trước",
   nextStopIs: "Trạm kế tiếp {stop}",
+  busInfo: "Thông tin xe buýt",
   voiceToggle: 'Giọng nói',
   endTrip: 'Kết thúc chuyến',
   endTripArmed: 'Nhấn lần nữa để kết thúc',

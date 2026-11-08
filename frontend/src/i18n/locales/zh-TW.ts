@@ -123,6 +123,7 @@ export const zhTW: Strings = {
   whereNextStop: "下一站{next}，還有 {n} 站到{stop}。",
   stripLabel: "接下來的站",
   nextStopIs: "下一站 {stop}",
+  busInfo: "公車資訊",
   voiceToggle: '語音',
   endTrip: '結束行程',
   endTripArmed: '再按一次結束',

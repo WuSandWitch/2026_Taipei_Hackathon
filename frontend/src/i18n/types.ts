@@ -142,6 +142,8 @@ export interface Strings {
   stripLabel: string;
   nextStopIs: string;
 
+  busInfo: string;
+
   /** Chrome that stays visible during a trip. */
   voiceToggle: string;
   endTrip: string;

@@ -123,6 +123,7 @@ export const en: Strings = {
   whereNextStop: "Next stop {next}. {n} stops to {stop}.",
   stripLabel: "Stops ahead",
   nextStopIs: "Next stop {stop}",
+  busInfo: "Bus information",
   voiceToggle: 'Voice',
   endTrip: 'End trip',
   endTripArmed: 'Press again to end',

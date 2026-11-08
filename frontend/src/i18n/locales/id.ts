@@ -124,6 +124,7 @@ export const id: Strings = {
   whereNextStop: "Halte berikutnya {next}. {n} halte lagi ke {stop}.",
   stripLabel: "Halte berikutnya",
   nextStopIs: "Halte berikutnya {stop}",
+  busInfo: "Informasi bus",
   voiceToggle: 'Suara',
   endTrip: 'Akhiri perjalanan',
   endTripArmed: 'Tekan sekali lagi untuk mengakhiri',
