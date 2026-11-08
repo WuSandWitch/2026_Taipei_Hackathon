@@ -6,6 +6,15 @@
 
 **一句話**：在手機上陪你把一趟公車搭完 —— 什麼時候該攔車、有沒有上對車、什麼時候該按鈴下車，都用大字、語音和震動主動告訴你。
 
+## 畫面
+
+實機截圖（iPhone，城市通 App 內執行）。同一套流程，語言和字體大小可以分開選。
+
+| | ① 選語言與字體 | ② 選路線 | ③ 確認這趟車 | ④ 舉牌攔車 | ⑤ 下車提醒 |
+|---|---|---|---|---|---|
+| **中文** | <img src="docs/screenshots/zh-1-language.png" width="150" alt="中文：選語言與字體"> | <img src="docs/screenshots/zh-2-route.png" width="150" alt="中文：選路線"> | <img src="docs/screenshots/zh-3-confirm.png" width="150" alt="中文：確認這趟車"> | <img src="docs/screenshots/zh-4-driver.png" width="150" alt="中文：舉牌攔車"> | <img src="docs/screenshots/zh-5-ride.png" width="150" alt="中文：下車提醒"> |
+| **Tiếng Việt** | <img src="docs/screenshots/vi-1-language.png" width="150" alt="Tiếng Việt：選語言與字體"> | <img src="docs/screenshots/vi-2-route.png" width="150" alt="Tiếng Việt：選路線"> | <img src="docs/screenshots/vi-3-confirm.png" width="150" alt="Tiếng Việt：確認這趟車"> | <img src="docs/screenshots/vi-4-driver.png" width="150" alt="Tiếng Việt：舉牌攔車"> | <img src="docs/screenshots/vi-5-ride.png" width="150" alt="Tiếng Việt：下車提醒"> |
+
 ## 使用情境
 
 搭公車其實有四個各自獨立的難關，而現有的 App 只解決了第一個（查到站時間）：
