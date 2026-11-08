@@ -11,6 +11,7 @@ import { say, Vibe } from '@/lib/announcer';
 import { getLocation } from '@/lib/bridge';
 import { source } from '@/data';
 import { trip } from '@/stores/trip';
+import { locale, placeName, s as L, spoken, t } from '@/i18n';
 
 type Phase = 'checking' | 'ok' | 'wrong' | 'unknown' | 'error';
 
@@ -18,11 +19,20 @@ const router = useRouter();
 const route = useRoute();
 const phase = ref<Phase>('checking');
 const r = computed(() => trip.route!);
+
+/**
+ * The backend writes `reason` as Chinese prose, so it is only shown to Chinese
+ * readers. Everyone else gets the localised explanation instead — a Vietnamese
+ * screen that suddenly drops into Chinese is worse than a slightly less
+ * specific sentence.
+ */
+const reasonFor = (fallback: string) =>
+  locale.value === 'zh-TW' ? (trip.boardCheck?.reason ?? fallback) : fallback;
 let autoTimer = 0;
 
 async function check() {
   phase.value = 'checking';
-  say(`正在確認你搭的是不是${r.value.routeName}，請稍等。`);
+  say(t('sayChecking', { route: r.value.routeName }));
   try {
     const pos = await getLocation();
     const result = await source.checkBoarded(r.value, trip.plate, pos);
@@ -30,24 +40,27 @@ async function check() {
     if (result.onBus) {
       if (result.plate) trip.plate = result.plate;
       phase.value = 'ok';
-      say(`確認了，你在${r.value.routeName}上，往${r.value.headsign}。下車前會提醒你。`, { vibe: Vibe.tick });
+      say(
+        t('sayOnBoard', {
+          route: r.value.routeName,
+          place: spoken(r.value.headsign, r.value.headsignEn)
+        }),
+        { vibe: Vibe.tick }
+      );
       autoTimer = window.setTimeout(goRide, 5000);
     } else if (result.status === 'wrong_bus') {
       phase.value = 'wrong';
-      say(`這班車可能不是${r.value.routeName}。${result.reason ?? ''}建議在下一站下車，我們會幫你重新等車。`, {
-        urgent: true,
-        vibe: Vibe.warning
-      });
+      say(t('sayWrongBus', { route: r.value.routeName }), { urgent: true, vibe: Vibe.warning });
     } else {
       // Not "wrong bus" — just no position data yet. Deliberately calmer: no
       // urgent announcement and no alarm buzz, because the usual cause is the
       // 15-60 s lag in A1 and the rider is most likely on the right bus.
       phase.value = 'unknown';
-      say(`還沒辦法確認。${result.reason ?? ''}`, { vibe: Vibe.tick });
+      say(t('sayUnknown'), { vibe: Vibe.tick });
     }
   } catch {
     phase.value = 'error';
-    say('現在沒辦法確認，可能是網路不穩。你可以再試一次，或先開始下車提醒。', { urgent: true });
+    say(L.value.sayCantCheck, { urgent: true });
   }
 }
 
@@ -69,35 +82,35 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
 <template>
   <div class="page">
     <template v-if="phase === 'checking'">
-      <StepHeading :step="3" focus-key="checking">正在確認你搭的車</StepHeading>
+      <StepHeading :step="3" focus-key="checking">{{ L.checkTitle }}</StepHeading>
       <div class="card result">
         <div class="badge badge--wait" aria-hidden="true"><span class="spinner" /></div>
-        <p class="lede">比對你的位置和 {{ r.routeName }} 公車的即時位置，大約需要幾秒。</p>
+        <p class="lede">{{ t('checkBody', { route: r.routeName }) }}</p>
       </div>
     </template>
 
     <template v-else-if="phase === 'ok'">
-      <StepHeading :step="3" focus-key="ok">搭對了，你在 {{ r.routeName }} 上</StepHeading>
+      <StepHeading :step="3" focus-key="ok">{{ t('okTitle', { route: r.routeName }) }}</StepHeading>
       <div class="card result">
         <div class="badge badge--ok" aria-hidden="true">✓</div>
-        <p class="big">往 {{ r.headsign }}<br />在 {{ trip.destination?.name }} 下車</p>
-        <p v-if="trip.plate" class="lede">車牌 <span class="num">{{ trip.plate }}</span></p>
+        <p class="big">{{ t('okBody', { place: placeName(r.headsign, r.headsignEn), stop: placeName(trip.destination?.name ?? '', trip.destination?.nameEn) }) }}</p>
+        <p v-if="trip.plate" class="lede">{{ t('plateIs', { plate: trip.plate }) }}</p>
       </div>
       <div class="page__actions">
-        <BigButton @click="goRide">開始下車提醒</BigButton>
+        <BigButton @click="goRide">{{ L.startRideAlert }}</BigButton>
       </div>
     </template>
 
     <template v-else-if="phase === 'wrong'">
-      <StepHeading :step="3" focus-key="wrong">這班可能不是 {{ r.routeName }}</StepHeading>
+      <StepHeading :step="3" focus-key="wrong">{{ t('wrongTitle', { route: r.routeName }) }}</StepHeading>
       <div class="card result">
         <div class="badge badge--bad" aria-hidden="true">!</div>
-        <p class="big">{{ trip.boardCheck?.reason ?? '你的位置和這路公車對不起來。' }}</p>
-        <p class="lede">建議在下一站下車，可以請司機或旁人協助。下車後我們會幫你重新等車。</p>
+        <p class="big">{{ reasonFor(L.wrongBody) }}</p>
+        <p class="lede">{{ L.wrongHint }}</p>
       </div>
       <div class="page__actions">
-        <BigButton variant="danger" @click="waitAgain">我下車了，重新等車</BigButton>
-        <BigButton variant="secondary" @click="goRide">我確定搭對了</BigButton>
+        <BigButton variant="danger" @click="waitAgain">{{ L.gotOffRewait }}</BigButton>
+        <BigButton variant="secondary" @click="goRide">{{ L.sureRight }}</BigButton>
       </div>
     </template>
 
@@ -105,31 +118,28 @@ onBeforeUnmount(() => window.clearTimeout(autoTimer));
          is that A1 has not refreshed, so the rider is probably on the right
          bus. Reminder colours, and "stay on" is the first action. -->
     <template v-else-if="phase === 'unknown'">
-      <StepHeading :step="3" focus-key="unknown">還沒辦法確認是不是 {{ r.routeName }}</StepHeading>
+      <StepHeading :step="3" focus-key="unknown">{{ t('unknownTitle', { route: r.routeName }) }}</StepHeading>
       <div class="card result">
         <div class="badge badge--warn" aria-hidden="true">?</div>
-        <p class="big">{{ trip.boardCheck?.reason ?? '車上的定位還沒更新。' }}</p>
-        <p class="lede">
-          這不代表你搭錯車。公車的定位大約每分鐘才更新一次，先別急著下車。
-          不放心的話，可以問司機：「這是 {{ r.routeName }} 嗎？」
-        </p>
+        <p class="big">{{ reasonFor(L.unknownBody) }}</p>
+        <p class="lede">{{ t('unknownHint', { route: r.routeName }) }}</p>
       </div>
       <div class="page__actions">
-        <BigButton @click="check">再確認一次</BigButton>
-        <BigButton variant="secondary" @click="goRide">我確定搭對了，開始提醒</BigButton>
-        <BigButton variant="quiet" @click="waitAgain">我下車了，重新等車</BigButton>
+        <BigButton @click="check">{{ L.checkAgain }}</BigButton>
+        <BigButton variant="secondary" @click="goRide">{{ L.sureRightStart }}</BigButton>
+        <BigButton variant="quiet" @click="waitAgain">{{ L.gotOffRewait }}</BigButton>
       </div>
     </template>
 
     <template v-else>
-      <StepHeading :step="3" focus-key="error">現在沒辦法確認</StepHeading>
+      <StepHeading :step="3" focus-key="error">{{ L.cantCheckTitle }}</StepHeading>
       <div class="card result">
         <div class="badge badge--warn" aria-hidden="true">?</div>
-        <p class="lede">可能是網路或定位不穩。你也可以直接問司機：「這是 {{ r.routeName }} 嗎？」</p>
+        <p class="lede">{{ t('cantCheckBody', { route: r.routeName }) }}</p>
       </div>
       <div class="page__actions">
-        <BigButton @click="check">再試一次</BigButton>
-        <BigButton variant="secondary" @click="goRide">先開始下車提醒</BigButton>
+        <BigButton @click="check">{{ L.retry2 }}</BigButton>
+        <BigButton variant="secondary" @click="goRide">{{ L.startRideAlert }}</BigButton>
       </div>
     </template>
   </div>

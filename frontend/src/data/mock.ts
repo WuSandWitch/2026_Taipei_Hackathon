@@ -13,25 +13,31 @@ const params = new URLSearchParams(window.location.search);
 const SPEED = Math.max(1, Number(params.get('speed')) || 10);
 const FORCE_WRONG = params.get('wrong') === '1';
 
-const STOP: BusStop = { id: 'mock-stop-1', name: '捷運市政府站', lat: 25.0411, lng: 121.5651 };
+const STOP: BusStop = {
+  id: 'mock-stop-1',
+  name: '捷運市政府站',
+  nameEn: 'MRT Taipei City Hall Sta.',
+  lat: 25.0411,
+  lng: 121.5651
+};
 
 const ROUTES: RouteOption[] = [
-  { routeId: 'mock-307', routeName: '307', direction: 0, headsign: '板橋前站', etaSec: 240 },
-  { routeId: 'mock-212', routeName: '212', direction: 0, headsign: '中興新村', etaSec: 120 },
-  { routeId: 'mock-blue5', routeName: '藍5', direction: 1, headsign: '捷運市政府站', etaSec: 540 },
-  { routeId: 'mock-zx', routeName: '忠孝幹線', direction: 0, headsign: '蘆洲', etaSec: 900 }
+  { routeId: 'mock-307', routeName: '307', direction: 0, headsign: '板橋前站', headsignEn: 'Banqiao Front Sta.', etaSec: 240 },
+  { routeId: 'mock-212', routeName: '212', direction: 0, headsign: '中興新村', headsignEn: 'Zhongxing New Village', etaSec: 120 },
+  { routeId: 'mock-blue5', routeName: '藍5', direction: 1, headsign: '捷運市政府站', headsignEn: 'MRT Taipei City Hall Sta.', etaSec: 540 },
+  { routeId: 'mock-zx', routeName: '忠孝幹線', direction: 0, headsign: '蘆洲', headsignEn: 'Luzhou', etaSec: 900 }
 ];
 
 const STOPS_307: RouteStop[] = [
-  { stopId: 'm-11', name: '忠孝敦化', seq: 11 },
-  { stopId: 'm-12', name: '忠孝復興', seq: 12 },
-  { stopId: 'm-13', name: '忠孝新生', seq: 13 },
-  { stopId: 'm-14', name: '善導寺', seq: 14 },
-  { stopId: 'm-15', name: '臺北車站', seq: 15 },
-  { stopId: 'm-16', name: '西門', seq: 16 },
-  { stopId: 'm-17', name: '龍山寺', seq: 17 },
-  { stopId: 'm-18', name: '萬華車站', seq: 18 },
-  { stopId: 'm-19', name: '板橋前站', seq: 19 }
+  { stopId: 'm-11', name: '忠孝敦化', nameEn: 'Zhongxiao Dunhua', seq: 11 },
+  { stopId: 'm-12', name: '忠孝復興', nameEn: 'Zhongxiao Fuxing', seq: 12 },
+  { stopId: 'm-13', name: '忠孝新生', nameEn: 'Zhongxiao Xinsheng', seq: 13 },
+  { stopId: 'm-14', name: '善導寺', nameEn: 'Shandao Temple', seq: 14 },
+  { stopId: 'm-15', name: '臺北車站', nameEn: 'Taipei Main Station', seq: 15 },
+  { stopId: 'm-16', name: '西門', nameEn: 'Ximen', seq: 16 },
+  { stopId: 'm-17', name: '龍山寺', nameEn: 'Longshan Temple', seq: 17 },
+  { stopId: 'm-18', name: '萬華車站', nameEn: 'Wanhua Station', seq: 18 },
+  { stopId: 'm-19', name: '板橋前站', nameEn: 'Banqiao Front Sta.', seq: 19 }
 ];
 
 const BOARDING_SEQ = 10;

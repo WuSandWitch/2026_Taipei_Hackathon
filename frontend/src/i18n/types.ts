@@ -136,6 +136,14 @@ export interface Strings {
   arriveBody: string;
   done: string;
 
+  whereNearDest: string;
+  whereBellNow: string;
+  whereNextStop: string;
+  stripLabel: string;
+  nextStopIs: string;
+
+  busInfo: string;
+
   /** Chrome that stays visible during a trip. */
   voiceToggle: string;
   endTrip: string;

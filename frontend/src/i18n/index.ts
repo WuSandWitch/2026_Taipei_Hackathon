@@ -100,6 +100,28 @@ export function spoken(zh: string, en?: string): string {
   return en && en.trim() ? en : zh;
 }
 
+/**
+ * The place name to SHOW. Same split as `spoken`, for the same reason: outside
+ * Chinese the romanised name is the only one the reader can use.
+ *
+ * Taipei's bus stop signs are bilingual, so English on screen still matches
+ * what is printed on the pole — the earlier worry that it would not was wrong.
+ * `placeAlt` supplies the Chinese as a second line in the few places where the
+ * rider has to match characters: the stop they are standing at, the list they
+ * pick a destination from, and the upcoming stops. It is empty for zh-TW,
+ * where the primary already is the Chinese name, and empty when TDX has no
+ * English, where `placeName` has already fallen back to Chinese.
+ */
+export function placeName(zh: string, en?: string): string {
+  if (state.locale === 'zh-TW') return zh;
+  return en && en.trim() ? en : zh;
+}
+
+export function placeAlt(zh: string, en?: string): string {
+  if (state.locale === 'zh-TW') return '';
+  return en && en.trim() ? zh : '';
+}
+
 export function setLocale(next: LocaleCode): void {
   state.locale = next;
   const meta = LOCALES.find((l) => l.code === next);
